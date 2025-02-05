@@ -2,17 +2,28 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 Console.WriteLine("Hello, World!");
 
 var links = GetJomashopLinks();
-var items = ParseItemsFromLinks(links);
+var results = ParseItemsFromLinksAsync(links);
 
-foreach (var item in items)
+await foreach (var result in results)
 {
-    Console.WriteLine(item);
+    if (result.IsLeft(out var item))
+    {
+        Console.WriteLine(item);
+    }
+
+    if (result.IsRight(out var browserDriverError))
+    {
+        Console.WriteLine($"An error occured while operating with a browser: {browserDriverError}");
+    }
 }
+
+Console.Read();
 
 static IEnumerable<Uri> GetJomashopLinks()
 {
@@ -27,32 +38,62 @@ static IEnumerable<Uri> GetJomashopLinks()
     yield return new Uri("https://www.jomashop.com/vacheron-constantin-6000v-110a-b544.html");
 }
 
-static IEnumerable<Item> ParseItemsFromLinks(IEnumerable<Uri> uris)
+static async IAsyncEnumerable<Either<Item, BrowserDriverError>> ParseItemsFromLinksAsync(IEnumerable<Uri> uris)
 {
+    var service = ChromeDriverService.CreateDefaultService();
+    service.SuppressInitialDiagnosticInformation = true;
+    service.HideCommandPromptWindow = true;
+
     var chromeOptions = new ChromeOptions();
-    chromeOptions.AddArgument("-headless");
-    using var driver = new ChromeDriver(chromeOptions);
+    chromeOptions.AddArguments(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "--host-resolver-rules=MAP ec2-52-23-111-175.compute-1.amazonaws.com 127.0.0.1",
+        "--headless",
+        "--incognito",
+        "--log-level=3");
+
+    using var driver = new ChromeDriver(service, chromeOptions);
 
     foreach (var uri in uris)
     {
-        driver.Navigate()
-              .GoToUrl(uri);
+        var errorOrHtml = await NavigateAndGetHtml(uri);
 
-        WaitForPageLoad(driver);
-
-        yield return Item.ParseFromHtml(
-                            uri,
-                            driver.PageSource);
+        yield return errorOrHtml.Match(
+            html => Either<Item, BrowserDriverError>.Left(
+                        Item.ParseFromHtml(
+                                uri,
+                                driver.PageSource)),
+            Either<Item, BrowserDriverError>.Right);
     }
 
     driver.Quit();
+
+    async Task<Either<string, BrowserDriverError>> NavigateAndGetHtml(Uri uri)
+    {
+        try
+        {
+            await driver.Navigate()
+                        .GoToUrlAsync(uri);
+
+            WaitForPageLoad(driver);
+            await WaitToMimicHumanBehavior();
+
+            return Either<string, BrowserDriverError>.Left(driver.PageSource);
+        }
+        catch (Exception ex)
+        {
+            return Either<string, BrowserDriverError>.Right(ex.FromException());
+        }
+    }
 }
 
-static void WaitForPageLoad(IWebDriver driver, int timeoutSec = 5) =>
-    new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSec))
+static void WaitForPageLoad(IWebDriver driver, int timeout = 5) =>
+    new WebDriverWait(driver, TimeSpan.FromSeconds(timeout))
             .Until(d => ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState")
                                                 .Equals("complete"));
 
+static Task WaitToMimicHumanBehavior() =>
+    Task.Delay(new Random().Next(2000, 5000));
 
 public static class StringExtensions
 {
@@ -154,4 +195,47 @@ public record Money(decimal Value, Currency Currency)
 
         return result != null;
     }
+}
+
+public record BrowserDriverError(string Message);
+
+public static class BrowserDriverErrorExtensions
+{
+    public static BrowserDriverError FromException(this Exception self) =>
+        new(self.Message);
+}
+
+public readonly record struct Either<TLeft, TRight>
+{
+    [AllowNull]
+    private readonly TLeft _left;
+
+    [AllowNull]
+    private readonly TRight _right;
+
+    private readonly bool _isLeft;
+
+    private Either([AllowNull] TLeft left, [AllowNull] TRight right, bool isLeft) =>
+        (_left, _right, _isLeft) = (left, right, isLeft);
+
+    public static Either<TLeft, TRight> Left(TLeft left) => new(left, default, true);
+
+    public static Either<TLeft, TRight> Right(TRight right) => new(default, right, false);
+
+    public T Match<T>(Func<TLeft, T> mapL, Func<TRight, T> mapR) =>
+        _isLeft ? mapL(_left) : mapR(_right);
+
+    public bool IsLeft([MaybeNullWhen(false)] out TLeft left)
+    {
+        left = _left;
+        return _isLeft;
+    }
+
+    public bool IsRight([MaybeNullWhen(false)] out TRight right)
+    {
+        right = _right;
+        return !_isLeft;
+    }
+
+    public override string ToString() => Match(l => $"Left {l}", r => $"Right {r}");
 }
