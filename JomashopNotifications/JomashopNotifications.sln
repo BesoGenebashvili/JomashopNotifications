@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JomashopNotifications", "JomashopNotifications\JomashopNotifications.csproj", "{D8AEDFBC-275D-43FF-8956-8C37ED39DB59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JomashopNotifications.Migration", "JomashopNotifications.Migration\JomashopNotifications.Migration.csproj", "{513C1CAC-CCD0-4196-A386-BBDD58A0D387}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D8AEDFBC-275D-43FF-8956-8C37ED39DB59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8AEDFBC-275D-43FF-8956-8C37ED39DB59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8AEDFBC-275D-43FF-8956-8C37ED39DB59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{513C1CAC-CCD0-4196-A386-BBDD58A0D387}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{513C1CAC-CCD0-4196-A386-BBDD58A0D387}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{513C1CAC-CCD0-4196-A386-BBDD58A0D387}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{513C1CAC-CCD0-4196-A386-BBDD58A0D387}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
