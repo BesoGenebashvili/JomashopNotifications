@@ -2,6 +2,8 @@
 
 using System.Globalization;
 
+namespace JomashopNotifications;
+
 public sealed record Money(decimal Value, Currency Currency)
 {
     public static Money Parse(string value) =>

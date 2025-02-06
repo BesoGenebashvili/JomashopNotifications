@@ -1,4 +1,6 @@
-﻿public static class StringExtensions
+﻿namespace JomashopNotifications;
+
+public static class StringExtensions
 {
     public static string AsBrief(
         this string self,

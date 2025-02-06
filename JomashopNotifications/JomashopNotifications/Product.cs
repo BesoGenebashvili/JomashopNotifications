@@ -1,20 +1,22 @@
 ﻿using HtmlAgilityPack;
 
-public abstract record Item(Uri Link)
+namespace JomashopNotifications;
+
+public abstract record Product(Uri Link)
 {
-    public sealed record InStock(Uri Link, Money Price) : Item(Link);
-    public sealed record OutOfStock(Uri Link) : Item(Link);
-    public sealed record Error(Uri Link, string Message) : Item(Link);
+    public sealed record InStock(Uri Link, Money Price) : Product(Link);
+    public sealed record OutOfStock(Uri Link) : Product(Link);
+    public sealed record Error(Uri Link, string Message) : Product(Link);
 
     public override string ToString() => this switch
     {
         InStock(var link, var price) => $"In stock, Link: {link.AbsoluteUri.AsBrief(40)}, Price: {price.Value}{price.Currency.AsSymbol()}",
         OutOfStock(var link) => $"Out of stock, Link: {link.AbsoluteUri.AsBrief(40)}",
         Error(var link) => $"Error, Link: {link.AbsoluteUri.AsBrief(40)}",
-        _ => throw new NotImplementedException(nameof(Item))
+        _ => throw new NotImplementedException(nameof(Product))
     };
 
-    public static Item ParseFromHtml(Uri link, string html)
+    public static Product ParseFromHtml(Uri link, string html)
     {
         const string StockAttributeName = "data-preload-product-stock-status";
 
@@ -48,7 +50,7 @@ public abstract record Item(Uri Link)
                                         .SelectSingleNode($"//div[@class='{PriceElementClass}']")
                                         ?.ChildNodes
                                         ?.FirstOrDefault()
-                                        ?.InnerText ?? throw new ArgumentException("Price text does not contain value");
+                                        ?.InnerText ?? throw new ArgumentException("Price text does not contain a value");
 
             return Money.Parse(priceText);
         }

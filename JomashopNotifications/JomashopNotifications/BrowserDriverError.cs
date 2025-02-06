@@ -1,4 +1,6 @@
-﻿public record BrowserDriverError(string Message);
+﻿namespace JomashopNotifications;
+
+public record BrowserDriverError(string Message);
 
 public static class BrowserDriverErrorExtensions
 {

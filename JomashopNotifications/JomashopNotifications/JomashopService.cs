@@ -2,37 +2,52 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 
+namespace JomashopNotifications;
+
 public static class JomashopService
 {
-    public static async IAsyncEnumerable<Either<Item, BrowserDriverError>> ParseItemsFromLinksAsync(IEnumerable<Uri> uris)
+    public static async IAsyncEnumerable<Either<Product, BrowserDriverError>> ParseProductsFromLinksAsync(IEnumerable<Uri> uris)
     {
-        var service = ChromeDriverService.CreateDefaultService();
-        service.SuppressInitialDiagnosticInformation = true;
-        service.HideCommandPromptWindow = true;
+        using var chromeService = ResolveChromeDriverService();
+        var chromeOptions = ResolveChromeOptions();
 
-        var chromeOptions = new ChromeOptions();
-        chromeOptions.AddArguments(
-            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-            "--host-resolver-rules=MAP ec2-52-23-111-175.compute-1.amazonaws.com 127.0.0.1",
-            "--headless",
-            "--incognito",
-            "--log-level=3");
-
-        using var driver = new ChromeDriver(service, chromeOptions);
+        using var driver = new ChromeDriver(chromeService, chromeOptions);
 
         foreach (var uri in uris)
         {
             var errorOrHtml = await NavigateAndGetHtml(uri);
 
             yield return errorOrHtml.Match(
-                html => Either<Item, BrowserDriverError>.Left(
-                            Item.ParseFromHtml(
+                html => Either<Product, BrowserDriverError>.Left(
+                            Product.ParseFromHtml(
                                     uri,
                                     driver.PageSource)),
-                Either<Item, BrowserDriverError>.Right);
+                Either<Product, BrowserDriverError>.Right);
         }
 
-        driver.Quit();
+        ChromeDriverService ResolveChromeDriverService()
+        {
+            var service = ChromeDriverService.CreateDefaultService();
+
+            service.SuppressInitialDiagnosticInformation = true;
+            service.HideCommandPromptWindow = true;
+
+            return service;
+        }
+
+        ChromeOptions ResolveChromeOptions()
+        {
+            var chromeOptions = new ChromeOptions();
+
+            chromeOptions.AddArguments(
+                "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", // To mimic real browser
+                "--host-resolver-rules=MAP ec2-52-23-111-175.compute-1.amazonaws.com 127.0.0.1",
+                "--headless", // Without UI
+                "--incognito", // Private
+                "--log-level=3"); // Without logs
+
+            return chromeOptions;
+        }
 
         async Task<Either<string, BrowserDriverError>> NavigateAndGetHtml(Uri uri)
         {

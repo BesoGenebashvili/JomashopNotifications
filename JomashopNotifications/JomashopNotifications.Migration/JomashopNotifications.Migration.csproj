@@ -10,6 +10,13 @@
 	<ItemGroup>
 		<PackageReference Include="FluentMigrator" Version="6.2.0" />
 		<PackageReference Include="FluentMigrator.Runner" Version="6.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="appsettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

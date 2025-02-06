@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
+namespace JomashopNotifications;
+
 public readonly record struct Either<TLeft, TRight>
 {
     [AllowNull]
