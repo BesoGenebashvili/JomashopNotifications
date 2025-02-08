@@ -1,4 +1,5 @@
 ﻿using FluentMigrator;
+using JomashopNotifications.Persistence.Common;
 using System.Collections.Immutable;
 
 namespace JomashopNotifications.Migration;
@@ -6,8 +7,6 @@ namespace JomashopNotifications.Migration;
 [Migration(2)]
 public class ProductsTableSeedMigration : FluentMigrator.Migration
 {
-    const string TableName = "Products";
-
     private readonly ImmutableList<Uri> _links =
         [
             new("https://www.jomashop.com/orient-contemporary-classic-champagne-dial-mens-watch-ra-ac0m04y10b.html"),
@@ -23,7 +22,7 @@ public class ProductsTableSeedMigration : FluentMigrator.Migration
 
     public override void Up() =>
         _links.ForEach(
-            link => Insert.IntoTable(TableName)
+            link => Insert.IntoTable(DatabaseTable.Products)
                           .Row(new
                           {
                               Link = link.AbsoluteUri,
@@ -32,6 +31,6 @@ public class ProductsTableSeedMigration : FluentMigrator.Migration
                           }));
 
     public override void Down() =>
-        Delete.FromTable(TableName)
+        Delete.FromTable(DatabaseTable.Products)
               .AllRows();
 }

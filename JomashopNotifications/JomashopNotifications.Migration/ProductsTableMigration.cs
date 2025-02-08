@@ -1,14 +1,13 @@
 ﻿using FluentMigrator;
+using JomashopNotifications.Persistence.Common;
 
 namespace JomashopNotifications.Migration;
 
 [Migration(1)]
 public class ProductsTableMigration : FluentMigrator.Migration
 {
-    const string TableName = "Products";
-
     public override void Up() =>
-        Create.Table(TableName)
+        Create.Table(DatabaseTable.Products)
               .WithColumn("Id").AsInt32()
                                .NotNullable()
                                .PrimaryKey()
@@ -25,5 +24,5 @@ public class ProductsTableMigration : FluentMigrator.Migration
                                       .NotNullable();
 
     public override void Down() =>
-        Delete.Table(TableName);
+        Delete.Table(DatabaseTable.Products);
 }
