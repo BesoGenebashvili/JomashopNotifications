@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JomashopNotifications", "Jo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JomashopNotifications.Migration", "JomashopNotifications.Migration\JomashopNotifications.Migration.csproj", "{513C1CAC-CCD0-4196-A386-BBDD58A0D387}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JomashopNotifications.Api", "JomashopNotifications.Api\JomashopNotifications.Api.csproj", "{574BE3D7-1AC3-407D-BC94-AC24E159D081}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{513C1CAC-CCD0-4196-A386-BBDD58A0D387}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{513C1CAC-CCD0-4196-A386-BBDD58A0D387}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{513C1CAC-CCD0-4196-A386-BBDD58A0D387}.Release|Any CPU.Build.0 = Release|Any CPU
+		{574BE3D7-1AC3-407D-BC94-AC24E159D081}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{574BE3D7-1AC3-407D-BC94-AC24E159D081}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{574BE3D7-1AC3-407D-BC94-AC24E159D081}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{574BE3D7-1AC3-407D-BC94-AC24E159D081}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
