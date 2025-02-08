@@ -3,9 +3,9 @@
 namespace JomashopNotifications.Migration;
 
 [Migration(1)]
-public class ProductTableMigration : FluentMigrator.Migration
+public class ProductsTableMigration : FluentMigrator.Migration
 {
-    const string TableName = "Product";
+    const string TableName = "Products";
 
     public override void Up() =>
         Create.Table(TableName)

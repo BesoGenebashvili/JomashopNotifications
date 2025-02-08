@@ -8,9 +8,9 @@ Console.WriteLine("Hello, World!");
 
 var configuration = CreateConfiguration();
 using var serviceProvider = CreateServiceProvider(configuration);
-var productLinksDatabase = serviceProvider.GetRequiredService<IProductDatabase>();
+var productLinksDatabase = serviceProvider.GetRequiredService<IProductsDatabase>();
 
-var links = await productLinksDatabase.ListProductAsync();
+var links = await productLinksDatabase.ListProductsAsync();
 var results = JomashopService.ParseProductsFromLinksAsync(links.Select(l => new Uri(l.Link)));
 
 await foreach (var result in results)
@@ -41,22 +41,22 @@ static ServiceProvider CreateServiceProvider(IConfiguration configuration)
 
     return new ServiceCollection()
                 .AddSingleton(configuration)
-                .AddSingleton<IProductDatabase>(_ => new ProductSqlDatabase(connectionString))
+                .AddSingleton<IProductsDatabase>(_ => new ProductsSqlDatabase(connectionString))
                 .BuildServiceProvider();
 }
 
 public sealed record JomashopLink(int Id, string Link);
 
-public interface IProductDatabase
+public interface IProductsDatabase
 {
     Task<JomashopLink> GetJomashopLinkAsync(int id);
-    Task<IEnumerable<JomashopLink>> ListProductAsync();
+    Task<IEnumerable<JomashopLink>> ListProductsAsync();
 }
 
-public sealed class ProductSqlDatabase(string ConnectionString) : IProductDatabase
+public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsDatabase
 {
     // Awaiting the function calls to ensure SqlConnection is properly used before disposal
-    private const string TableName = "dbo.Product";
+    private const string TableName = "dbo.Products";
 
     public async Task<JomashopLink> GetJomashopLinkAsync(int id)
     {
@@ -72,7 +72,7 @@ public sealed class ProductSqlDatabase(string ConnectionString) : IProductDataba
         return await connection.QuerySingleAsync<JomashopLink>(sql, @params);
     }
 
-    public async Task<IEnumerable<JomashopLink>> ListProductAsync()
+    public async Task<IEnumerable<JomashopLink>> ListProductsAsync()
     {
         using var connection = new SqlConnection(ConnectionString);
 

@@ -4,9 +4,9 @@ using System.Collections.Immutable;
 namespace JomashopNotifications.Migration;
 
 [Migration(2)]
-public class ProductTableSeedMigration : FluentMigrator.Migration
+public class ProductsTableSeedMigration : FluentMigrator.Migration
 {
-    const string TableName = "Product";
+    const string TableName = "Products";
 
     private readonly ImmutableList<Uri> _links =
         [
