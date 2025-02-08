@@ -7,10 +7,9 @@ var configuration = CreateConfiguration();
 using var serviceProvider = CreateServiceProvider(configuration);
 using var serviceScope = serviceProvider.CreateScope();
 
-var migrationRunner = serviceScope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+var migration = serviceScope.ServiceProvider.GetRequiredService<Migration>();
 
-// From Appsettings
-migrationRunner.MigrateUp();
+migration.Run();
 
 Console.WriteLine("Hello, World!");
 
@@ -23,6 +22,7 @@ static IConfiguration CreateConfiguration() =>
 static ServiceProvider CreateServiceProvider(IConfiguration configuration) =>
     new ServiceCollection()
         .AddSingleton(configuration)
+        .Configure<AppSettings>(configuration.GetSection("AppSettings"))
         .AddFluentMigratorCore()
         .Configure<RunnerOptions>(options => options.Profile = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"))
         .ConfigureRunner(builder =>
@@ -30,4 +30,11 @@ static ServiceProvider CreateServiceProvider(IConfiguration configuration) =>
                    .WithGlobalConnectionString(configuration.GetConnectionString("DefaultConnection"))
                    .ScanIn(typeof(Program).Assembly).For.Migrations())
         .AddLogging(builder => builder.AddFluentMigratorConsole())
+        .AddTransient<Migration>()
         .BuildServiceProvider(false);
+
+internal sealed record AppSettings
+{
+    public bool CreateDatabaseTables { get; init; }
+    public bool DeleteDatabaseTables { get; init; }
+}

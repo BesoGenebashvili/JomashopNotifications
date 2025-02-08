@@ -3,10 +3,10 @@ using System.Collections.Immutable;
 
 namespace JomashopNotifications.Migration;
 
-[Profile("Development")]
-public class ProductLinksTableSeedMigration : FluentMigrator.Migration
+[Migration(2)]
+public class ProductTableSeedMigration : FluentMigrator.Migration
 {
-    const string TableName = "ProductLinks";
+    const string TableName = "Product";
 
     private readonly ImmutableList<Uri> _links =
         [
@@ -26,7 +26,9 @@ public class ProductLinksTableSeedMigration : FluentMigrator.Migration
             link => Insert.IntoTable(TableName)
                           .Row(new
                           {
-                              Link = link.AbsoluteUri
+                              Link = link.AbsoluteUri,
+                              Status = 1,
+                              UpdatedAt = DateTime.UtcNow
                           }));
 
     public override void Down() =>
