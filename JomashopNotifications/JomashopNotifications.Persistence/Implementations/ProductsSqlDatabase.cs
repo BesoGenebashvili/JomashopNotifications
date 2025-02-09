@@ -9,7 +9,7 @@ namespace JomashopNotifications.Persistence.Implementations;
 // Awaiting the function calls to ensure SqlConnection is properly used before disposal
 public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsDatabase
 {
-    public async Task<Product> GetAsync(int id)
+    public async Task<ProductEntity> GetAsync(int id)
     {
         using var connection = new SqlConnection(ConnectionString);
 
@@ -23,25 +23,25 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
                   WHERE Id = @id
                   """;
 
-        return await connection.QuerySingleAsync<Product>(sql, @params);
+        return await connection.QuerySingleAsync<ProductEntity>(sql, @params);
     }
 
-    public async Task<IEnumerable<Product>> ListAsync()
+    public async Task<IEnumerable<ProductEntity>> ListAsync()
     {
         using var connection = new SqlConnection(ConnectionString);
 
         var sql = $"SELECT * FROM dbo.{DatabaseTable.Products} WITH(NOLOCK)";
 
-        return await connection.QueryAsync<Product>(sql, CancellationToken.None);
+        return await connection.QueryAsync<ProductEntity>(sql, CancellationToken.None);
     }
 
-    public async Task<int> InsertAsync(InsertProductModel insertProductModel)
+    public async Task<int> InsertAsync(InsertProductEntity insertProductModel)
     {
         using var connection = new SqlConnection(ConnectionString);
 
         var @params = new DynamicParameters(new
         {
-            link = insertProductModel.Link.AbsoluteUri,
+            link = insertProductModel.Link,
             status = insertProductModel.Status,
             updatedAt = DateTime.UtcNow
         });

@@ -8,6 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JomashopNotifications.Application\JomashopNotifications.Application.csproj" />
+    <ProjectReference Include="..\JomashopNotifications.Persistence\JomashopNotifications.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

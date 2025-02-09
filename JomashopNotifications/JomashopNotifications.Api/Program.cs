@@ -1,17 +1,29 @@
+using JomashopNotifications.Application;
+using JomashopNotifications.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddMediatR();
+builder.Services.AddSqlDatabase(builder.Configuration);
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.MapGet("/", () => Results.Redirect("/swagger"))
+   .ExcludeFromDescription();
+
+app.MapGet("/swagger", () => Results.Redirect("/swagger"))
+   .ExcludeFromDescription();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
