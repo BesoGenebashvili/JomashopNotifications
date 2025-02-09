@@ -9,7 +9,7 @@ namespace JomashopNotifications.Persistence.Implementations;
 // Awaiting the function calls to ensure SqlConnection is properly used before disposal
 public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsDatabase
 {
-    public async Task<ProductEntity> GetAsync(int id)
+    public async Task<ProductEntity?> GetAsync(int id)
     {
         using var connection = new SqlConnection(ConnectionString);
 
@@ -23,7 +23,7 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
                   WHERE Id = @id
                   """;
 
-        return await connection.QuerySingleAsync<ProductEntity>(sql, @params);
+        return await connection.QueryFirstOrDefaultAsync<ProductEntity>(sql, @params);
     }
 
     public async Task<IEnumerable<ProductEntity>> ListAsync()

@@ -3,14 +3,11 @@ using JomashopNotifications.Persistence.Abstractions;
 
 namespace JomashopNotifications.Application.Product.Commands;
 
-public sealed record SetStatusAsInactiveCommand : IRequest<bool>
-{
-    public required int Id { get; init; }
-}
+public sealed record SetStatusAsInactiveCommand(int Id) : IRequest;
 
 public sealed class SetStatusAsInactiveCommandHandler(IProductsDatabase productsDatabase)
-    : IRequestHandler<SetStatusAsInactiveCommand, bool>
+    : IRequestHandler<SetStatusAsInactiveCommand>
 {
-    public async Task<bool> Handle(SetStatusAsInactiveCommand request, CancellationToken cancellationToken) =>
+    public async Task Handle(SetStatusAsInactiveCommand request, CancellationToken cancellationToken) =>
         await productsDatabase.SetStatusAsInactiveAsync(request.Id);
 }

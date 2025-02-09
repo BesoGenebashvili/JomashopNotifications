@@ -8,37 +8,44 @@ namespace JomashopNotifications.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController : ControllerBase
+public class ProductsController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<ProductsController> _logger;
-
-    public ProductsController(
-        IMediator mediator,
-        ILogger<ProductsController> logger)
-    {
-        _mediator = mediator;
-        _logger = logger;
-    }
-
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ProductDto>> GetAsync(int id)
-    {
-        var product = await _mediator.Send(new GetProductByIdQuery() { Id = id });
-
-        if (product == null)
+    public async Task<ActionResult<ProductDto>> GetAsync(int id) =>
+        await mediator.Send(new GetProductByIdQuery() { Id = id }) switch
         {
-            return NotFound();
-        }
+            { } product => Ok(product),
+            _ => NotFound($"Product with Id = {id} not found")
+        };
 
-        return Ok(product);
-    }
+    [HttpGet("list")]
+    public async Task<ActionResult<List<ProductDto>>> ListAsync() =>
+        await mediator.Send(new ListProductsQuery());
 
     [HttpPost]
-    public async Task<ActionResult<int>> PostAsync([FromBody] CreateProductCommand request)
+    public async Task<ActionResult<int>> CreateAsync([FromBody] CreateProductCommand command)
     {
-        var id = await _mediator.Send(request);
+        var id = await mediator.Send(command);
 
         return Created("/", new { id });
     }
+
+    [HttpPut("activate/{id:int}")]
+    public async Task<ActionResult> SetStatusAsActiveAsync(int id)
+    {
+        await mediator.Send(new SetStatusAsActiveCommand(id));
+        return Ok();
+    }
+
+    [HttpPut("deactivate/{id:int}")]
+    public async Task<ActionResult> SetStatusAsInactiveAsync(int id)
+    {
+        await mediator.Send(new SetStatusAsInactiveCommand(id));
+        return Ok();
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<bool>> DeleteAsync(int id) =>
+        await mediator.Send(
+            new DeleteProductCommand(id));
 }

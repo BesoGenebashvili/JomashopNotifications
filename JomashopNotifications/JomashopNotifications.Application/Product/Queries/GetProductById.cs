@@ -5,21 +5,19 @@ using JomashopNotifications.Application.Common;
 
 namespace JomashopNotifications.Application.Product.Queries;
 
-public sealed record GetProductByIdQuery : IRequest<ProductDto>
+public sealed record GetProductByIdQuery : IRequest<ProductDto?>
 {
     public required int Id { get; init; }
 }
 
 public sealed class GetProductByIdQueryHandler(IProductsDatabase productsDatabase)
-    : IRequestHandler<GetProductByIdQuery, ProductDto>
+    : IRequestHandler<GetProductByIdQuery, ProductDto?>
 {
-    public async Task<ProductDto> Handle(
+    public async Task<ProductDto?> Handle(
         GetProductByIdQuery request,
-        CancellationToken cancellationToken)
-    {
-        var productEntity = await productsDatabase.GetAsync(request.Id);
-
-        return productEntity.ToDto();
-    }
+        CancellationToken cancellationToken) =>
+        await productsDatabase.GetAsync(request.Id) is { } product 
+                ? product.ToDto()
+                : null;
 }
 

@@ -3,10 +3,7 @@ using JomashopNotifications.Persistence.Abstractions;
 
 namespace JomashopNotifications.Application.Product.Commands;
 
-public sealed record DeleteProductCommand : IRequest<bool>
-{
-    public required int Id { get; init; }
-}
+public sealed record DeleteProductCommand(int Id) : IRequest<bool>;
 
 public sealed class DeleteProductCommandHandler(IProductsDatabase productsDatabase)
     : IRequestHandler<DeleteProductCommand, bool>
