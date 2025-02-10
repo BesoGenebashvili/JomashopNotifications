@@ -8,7 +8,7 @@ namespace JomashopNotifications.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController(IMediator mediator) : ControllerBase
+public sealed class ProductsController(IMediator mediator) : ControllerBase
 {
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ProductDto>> GetAsync(int id) =>
@@ -46,6 +46,5 @@ public class ProductsController(IMediator mediator) : ControllerBase
 
     [HttpDelete("{id:int}")]
     public async Task<ActionResult<bool>> DeleteAsync(int id) =>
-        await mediator.Send(
-            new DeleteProductCommand(id));
+        await mediator.Send(new DeleteProductCommand(id));
 }

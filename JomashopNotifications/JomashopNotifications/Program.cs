@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using JomashopNotifications.Persistence;
 using JomashopNotifications.Persistence.Abstractions;
+using JomashopNotifications.Domain;
 
 Console.WriteLine("Hello, World!");
 

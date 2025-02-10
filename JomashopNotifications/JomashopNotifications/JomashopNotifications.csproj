@@ -17,6 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\JomashopNotifications.Domain\JomashopNotifications.Domain.csproj" />
 	  <ProjectReference Include="..\JomashopNotifications.Persistence\JomashopNotifications.Persistence.csproj" />
 	</ItemGroup>
 

@@ -1,8 +1,10 @@
-﻿using OpenQA.Selenium;
+﻿using JomashopNotifications.Domain.Common;
+using JomashopNotifications.Domain.Models;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 
-namespace JomashopNotifications;
+namespace JomashopNotifications.Domain;
 
 public static class JomashopService
 {

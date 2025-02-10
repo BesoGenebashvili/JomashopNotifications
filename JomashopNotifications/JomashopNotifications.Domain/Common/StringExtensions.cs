@@ -1,4 +1,4 @@
-﻿namespace JomashopNotifications;
+﻿namespace JomashopNotifications.Domain.Common;
 
 public static class StringExtensions
 {

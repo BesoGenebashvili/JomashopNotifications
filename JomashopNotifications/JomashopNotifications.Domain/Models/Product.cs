@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
+using JomashopNotifications.Domain.Common;
 
-namespace JomashopNotifications;
+namespace JomashopNotifications.Domain.Models;
 
 public abstract record Product(Uri Link)
 {

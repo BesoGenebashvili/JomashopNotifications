@@ -1,8 +1,6 @@
 ﻿#pragma warning disable IDE0055
 
-using System.Globalization;
-
-namespace JomashopNotifications;
+namespace JomashopNotifications.Domain.Models;
 
 public sealed record Money(decimal Value, Currency Currency)
 {
@@ -13,10 +11,12 @@ public sealed record Money(decimal Value, Currency Currency)
 
     public static bool TryParse(string value, out Money? result)
     {
-        result = value switch
+        result = value.Trim() switch
         {
-            ['$', .. var n] => new(decimal.Parse(n, CultureInfo.InvariantCulture), Currency.USD),
-            ['€', .. var n] => new(decimal.Parse(n, CultureInfo.InvariantCulture), Currency.EUR),
+            ['$', .. var n] when decimal.TryParse(n.Trim(), out decimal v) => new(v, Currency.USD),
+            ['€', .. var n] when decimal.TryParse(n.Trim(), out decimal v) => new(v, Currency.EUR),
+            [.. var n, '$'] when decimal.TryParse(n.Trim(), out decimal v) => new(v, Currency.USD),
+            [.. var n, '€'] when decimal.TryParse(n.Trim(), out decimal v) => new(v, Currency.EUR),
             _ => null,
         };
 
