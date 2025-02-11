@@ -38,5 +38,5 @@ static IConfiguration CreateConfiguration() =>
 static ServiceProvider CreateServiceProvider(IConfiguration configuration) =>
     new ServiceCollection()
             .AddSingleton(configuration)
-            .AddSqlDatabase(configuration)
+            .AddPersistenceServices(configuration)
             .BuildServiceProvider();

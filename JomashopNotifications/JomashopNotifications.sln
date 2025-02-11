@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JomashopNotifications.Appli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JomashopNotifications.Domain", "JomashopNotifications.Domain\JomashopNotifications.Domain.csproj", "{C1073038-32B5-4EDF-83AE-F094E3D77BA2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JomashopNotifications.Worker", "JomashopNotifications.Worker\JomashopNotifications.Worker.csproj", "{944F4E73-2EAC-462F-A750-F334CB5C342C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{C1073038-32B5-4EDF-83AE-F094E3D77BA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1073038-32B5-4EDF-83AE-F094E3D77BA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1073038-32B5-4EDF-83AE-F094E3D77BA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{944F4E73-2EAC-462F-A750-F334CB5C342C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{944F4E73-2EAC-462F-A750-F334CB5C342C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{944F4E73-2EAC-462F-A750-F334CB5C342C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{944F4E73-2EAC-462F-A750-F334CB5C342C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

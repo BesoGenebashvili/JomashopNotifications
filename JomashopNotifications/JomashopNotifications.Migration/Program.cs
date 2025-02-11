@@ -22,7 +22,7 @@ static IConfiguration CreateConfiguration() =>
 static ServiceProvider CreateServiceProvider(IConfiguration configuration) =>
     new ServiceCollection()
         .AddSingleton(configuration)
-        .Configure<AppSettings>(configuration.GetSection("AppSettings"))
+        .Configure<AppSettings>(configuration.GetSection(AppSettings.SectionName))
         .AddFluentMigratorCore()
         .Configure<RunnerOptions>(options => options.Profile = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"))
         .ConfigureRunner(builder =>
@@ -32,9 +32,3 @@ static ServiceProvider CreateServiceProvider(IConfiguration configuration) =>
         .AddLogging(builder => builder.AddFluentMigratorConsole())
         .AddTransient<Migration>()
         .BuildServiceProvider(false);
-
-internal sealed record AppSettings
-{
-    public bool CreateDatabaseTables { get; init; }
-    public bool DeleteDatabaseTables { get; init; }
-}

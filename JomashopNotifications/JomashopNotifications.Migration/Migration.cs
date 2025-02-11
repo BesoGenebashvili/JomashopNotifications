@@ -1,27 +1,24 @@
 ﻿using FluentMigrator.Runner;
 using Microsoft.Extensions.Options;
 
-internal sealed class Migration
+internal sealed class Migration(
+    IMigrationRunner migrationRunner, 
+    IOptions<AppSettings> appSettingsOptions)
 {
-    private readonly IMigrationRunner _migrationRunner;
-    private readonly AppSettings _appSettings;
-
-    public Migration(IMigrationRunner migrationRunner, IOptions<AppSettings> appSettingsOptions)
-    {
-        _migrationRunner = migrationRunner;
-        _appSettings = appSettingsOptions.Value;
-    }
+    private readonly AppSettings appSettings = appSettingsOptions.Value;
 
     public void Run()
     {
-        if (_appSettings.CreateDatabaseTables)
+        if (appSettings.CreateDatabaseTables)
         {
-            _migrationRunner.MigrateUp();
+            migrationRunner.MigrateUp();
         }
-        else if (_appSettings.DeleteDatabaseTables)
+        else if (appSettings.DeleteDatabaseTables)
         {
+            // From settings
             var version = 0;
-            _migrationRunner.MigrateDown(version);
+
+            migrationRunner.MigrateDown(version);
         }
     }
 }
