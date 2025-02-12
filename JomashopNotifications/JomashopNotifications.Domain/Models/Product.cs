@@ -14,12 +14,12 @@ public abstract record Product(Uri Link)
         public sealed record Error(ToBeChecked Reference, string Message) : Checked(Reference);
     }
 
-    public override string ToString() => this switch
+    public string Show() => this switch
     {
-        ToBeChecked(var link) => $"To be checked, Link: {link.AbsoluteUri.AsBrief(40)}",
-        Checked.InStock(var reference, var price) => $"In stock, Link: {reference.Link.AbsoluteUri.AsBrief(40)}, Price: {price.Value}{price.Currency.AsSymbol()}",
-        Checked.OutOfStock(var reference) => $"Out of stock, Link: {reference.Link.AbsoluteUri.AsBrief(40)}",
-        Checked.Error(var reference) => $"Error, Link: {reference.Link.AbsoluteUri.AsBrief(40)}",
+        ToBeChecked(var link) => $"To be checked, Link: {link.AbsoluteUri.AsBrief()}",
+        Checked.InStock(var reference, var price) => $"In stock, Link: {reference.Link.AbsoluteUri.AsBrief()}, Price: {price.Value}{price.Currency.AsSymbol()}",
+        Checked.OutOfStock(var reference) => $"Out of stock, Link: {reference.Link.AbsoluteUri.AsBrief()}",
+        Checked.Error(var reference) => $"Error, Link: {reference.Link.AbsoluteUri.AsBrief()}",
         _ => throw new NotImplementedException(nameof(Product))
     };
 }

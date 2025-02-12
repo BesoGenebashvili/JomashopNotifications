@@ -4,6 +4,7 @@ using JomashopNotifications.Persistence;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Domain;
 using JomashopNotifications.Domain.Models;
+using JomashopNotifications.Persistence.Entities;
 
 Console.WriteLine("Hello, World!");
 
@@ -13,13 +14,18 @@ var productsDatabase = serviceProvider.GetRequiredService<IProductsDatabase>();
 var jomashopBrowserDriverService = serviceProvider.GetRequiredService<JomashopBrowserDriverService>();
 
 var products = await productsDatabase.ListAsync();
-var results = await jomashopBrowserDriverService.CheckProductsAsync(products.Select(l => new Product.ToBeChecked(new(l.Link))));
+
+var productsToCheck = products.Where(p => p.Status is ProductStatus.Active && Uri.IsWellFormedUriString(p.Link, UriKind.Absolute))
+                              .Select(p => new Product.ToBeChecked(new(p.Link))).Take(2)
+                              .ToList();
+
+var results = await jomashopBrowserDriverService.CheckProductsAsync(productsToCheck);
 
 foreach (var result in results)
 {
     if (result.IsLeft(out var item))
     {
-        Console.WriteLine(item);
+        Console.WriteLine(item.Show());
     }
 
     if (result.IsRight(out var browserDriverError))

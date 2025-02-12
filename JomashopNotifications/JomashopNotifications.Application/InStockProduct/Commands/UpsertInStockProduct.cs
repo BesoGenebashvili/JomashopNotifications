@@ -3,15 +3,15 @@ using MediatR;
 
 namespace JomashopNotifications.Application.InStockProduct.Commands;
 
-public sealed record CreateInStockProductCommand(
+public sealed record UpsertInStockProductCommand(
     int ProductId, 
     decimal Price) : IRequest<int>;
 
-public sealed class CreateInStockProductCommandHandler(IInStockProductsDatabase inStockProductsDatabase)
-    : IRequestHandler<CreateInStockProductCommand, int>
+public sealed class UpsertInStockProductCommandHandler(IInStockProductsDatabase inStockProductsDatabase)
+    : IRequestHandler<UpsertInStockProductCommand, int>
 {
     public async Task<int> Handle(
-        CreateInStockProductCommand request,
+        UpsertInStockProductCommand request,
         CancellationToken cancellationToken) =>
         await inStockProductsDatabase.InsertAsync(
             request.ProductId, 

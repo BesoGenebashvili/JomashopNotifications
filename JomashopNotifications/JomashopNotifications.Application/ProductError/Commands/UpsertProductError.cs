@@ -3,13 +3,13 @@ using MediatR;
 
 namespace JomashopNotifications.Application.ProductError.Commands;
 
-public sealed record CreateProductErrorCommand(int ProductId, string Message) : IRequest<int>;
+public sealed record UpsertProductErrorCommand(int ProductId, string Message) : IRequest<int>;
 
-public sealed class CreateProductErrorCommandHandler(IProductErrorsDatabase productErrorsDatabase)
-    : IRequestHandler<CreateProductErrorCommand, int>
+public sealed class UpsertProductErrorCommandHandler(IProductErrorsDatabase productErrorsDatabase)
+    : IRequestHandler<UpsertProductErrorCommand, int>
 {
     public async Task<int> Handle(
-        CreateProductErrorCommand request,
+        UpsertProductErrorCommand request,
         CancellationToken cancellationToken) =>
         await productErrorsDatabase.InsertAsync(
             request.ProductId, 

@@ -3,13 +3,13 @@ using MediatR;
 
 namespace JomashopNotifications.Application.OutOfStockProduct.Commands;
 
-public sealed record CreateOutOfStockProductCommand(int ProductId) : IRequest<int>;
+public sealed record UpsertOutOfStockProductCommand(int ProductId) : IRequest<int>;
 
-public sealed class CreateOutOfStockProductCommandHandler(IOutOfStockProductsDatabase outOfStockProductsDatabase)
-    : IRequestHandler<CreateOutOfStockProductCommand, int>
+public sealed class UpsertOutOfStockProductCommandHandler(IOutOfStockProductsDatabase outOfStockProductsDatabase)
+    : IRequestHandler<UpsertOutOfStockProductCommand, int>
 {
     public async Task<int> Handle(
-        CreateOutOfStockProductCommand request,
+        UpsertOutOfStockProductCommand request,
         CancellationToken cancellationToken) =>
         await outOfStockProductsDatabase.InsertAsync(request.ProductId);
 }
