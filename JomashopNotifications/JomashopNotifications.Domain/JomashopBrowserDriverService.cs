@@ -3,13 +3,15 @@ using JomashopNotifications.Domain.Models;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using System.ComponentModel;
 
 namespace JomashopNotifications.Domain;
 
 public sealed class JomashopBrowserDriverService
 {
     // Option for Edge/Google driver selection - appsettings.json
-    public async IAsyncEnumerable<Either<Product.Checked, BrowserDriverError>> ParseProductsFromLinksAsync(
+    // IAsyncEnumerable? semaphore?
+    public async Task<List<Either<Product.Checked, BrowserDriverError>>> CheckProductsAsync(
         IEnumerable<Product.ToBeChecked> productsToCheck)
     {
         using var chromeService = ResolveChromeDriverService();
@@ -17,15 +19,17 @@ public sealed class JomashopBrowserDriverService
 
         using var driver = new ChromeDriver(chromeService, chromeOptions);
 
+        var results = new List<Either<Product.Checked, BrowserDriverError>>();
+
         foreach (var productToCheck in productsToCheck)
         {
-            var htmlOrError = await NavigateAndGetHtml(productToCheck.Link);
-
-            yield return htmlOrError.Match(
-                html => Either<Product.Checked, BrowserDriverError>.Left(
-                            productToCheck.ParseFromHtml(driver.PageSource)),
-                Either<Product.Checked, BrowserDriverError>.Right);
+            var result = await CheckProductAsync(productToCheck);
+            results.Add(result);
         }
+
+        driver.Close();
+
+        return results;
 
         ChromeDriverService ResolveChromeDriverService()
         {
@@ -49,6 +53,16 @@ public sealed class JomashopBrowserDriverService
                 "--log-level=3"); // Without logs
 
             return chromeOptions;
+        }
+
+        async Task<Either<Product.Checked, BrowserDriverError>> CheckProductAsync(Product.ToBeChecked productToCheck)
+        {
+            var htmlOrError = await NavigateAndGetHtml(productToCheck.Link);
+
+            return htmlOrError.Match(
+                     html => Either<Product.Checked, BrowserDriverError>.Left(
+                                 productToCheck.ParseFromHtml(driver.PageSource)),
+                     Either<Product.Checked, BrowserDriverError>.Right);
         }
 
         async Task<Either<string, BrowserDriverError>> NavigateAndGetHtml(Uri uri)

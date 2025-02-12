@@ -3,11 +3,7 @@ using MediatR;
 
 namespace JomashopNotifications.Application.ProductError.Commands;
 
-public sealed record CreateProductErrorCommand : IRequest<int>
-{
-    public required int ProductId { get; init; }
-    public required string Message { get; init; }
-}
+public sealed record CreateProductErrorCommand(int ProductId, string Message) : IRequest<int>;
 
 public sealed class CreateProductErrorCommandHandler(IProductErrorsDatabase productErrorsDatabase)
     : IRequestHandler<CreateProductErrorCommand, int>

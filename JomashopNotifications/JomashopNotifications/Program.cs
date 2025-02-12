@@ -13,9 +13,9 @@ var productsDatabase = serviceProvider.GetRequiredService<IProductsDatabase>();
 var jomashopBrowserDriverService = serviceProvider.GetRequiredService<JomashopBrowserDriverService>();
 
 var products = await productsDatabase.ListAsync();
-var results = jomashopBrowserDriverService.ParseProductsFromLinksAsync(products.Select(l => new Product.ToBeChecked(new(l.Link))));
+var results = await jomashopBrowserDriverService.CheckProductsAsync(products.Select(l => new Product.ToBeChecked(new(l.Link))));
 
-await foreach (var result in results)
+foreach (var result in results)
 {
     if (result.IsLeft(out var item))
     {

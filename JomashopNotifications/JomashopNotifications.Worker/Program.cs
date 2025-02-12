@@ -2,6 +2,7 @@
 using JomashopNotifications.Application.Product.Queries;
 using JomashopNotifications.Domain;
 using JomashopNotifications.Persistence;
+using JomashopNotifications.Persistence.Entities;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,18 +70,15 @@ public sealed class JomashopDataSyncJob(
     {
         // List active products (I need to implement filters)
         var products = await mediator.Send(new ListProductsQuery());
+        var activeProducts = products.Where(p => p.Status is ProductStatus.Active);
 
-        if (products.Count == 0)
+        if (!activeProducts.Any())
         {
             Log.Information("No active products found in the database");
             return;
         }
 
-        Log.Debug("Active products: {@ProductIds}", string.Join(", ", products.Select(x => x.Id)));
-        Log.Information("Found {Count} active products in the database.", products.Count);
-
-        var productLinks = products.Select(x => x.Link);
-
-        throw new NotImplementedException();
+        Log.Debug("Active products: {@ProductIds}", string.Join(", ", activeProducts.Select(x => x.Id)));
+        Log.Information("Found {Count} active products in the database.", activeProducts.Count());
     }
 }

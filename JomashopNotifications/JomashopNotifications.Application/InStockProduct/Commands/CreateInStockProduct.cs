@@ -3,11 +3,9 @@ using MediatR;
 
 namespace JomashopNotifications.Application.InStockProduct.Commands;
 
-public sealed record CreateInStockProductCommand : IRequest<int>
-{
-    public required int ProductId { get; init; }
-    public required decimal Price { get; init; }
-}
+public sealed record CreateInStockProductCommand(
+    int ProductId, 
+    decimal Price) : IRequest<int>;
 
 public sealed class CreateInStockProductCommandHandler(IInStockProductsDatabase inStockProductsDatabase)
     : IRequestHandler<CreateInStockProductCommand, int>
