@@ -1,5 +1,8 @@
 ﻿using JomashopNotifications.Application;
+using JomashopNotifications.Application.Product.Queries;
+using JomashopNotifications.Domain;
 using JomashopNotifications.Persistence;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,6 +38,7 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
             services.Configure<WorkerOptions>(optionsSection)
                     .AddPersistenceServices(configuration)
                     .AddApplicationServices()
+                    .AddDomainServices()
                     .AddQuartz(c =>
                     {
                         c.AddJob<JomashopDataSyncJob>(
@@ -54,14 +58,29 @@ public sealed record WorkerOptions(int RunEveryMinutes)
     public const string SectionName = "WorkerOptions";
 }
 
-public sealed class JomashopDataSyncJob : IJob
+public sealed class JomashopDataSyncJob(
+    IMediator mediator,
+    JomashopBrowserDriverService browserDriverService) : IJob
 {
     public static readonly JobKey key =
         new(nameof(JomashopDataSyncJob), "DataSync");
 
-    public Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context)
     {
-        // TODO
-        return Task.CompletedTask;
+        // List active products (I need to implement filters)
+        var products = await mediator.Send(new ListProductsQuery());
+
+        if (products.Count == 0)
+        {
+            Log.Information("No active products found in the database");
+            return;
+        }
+
+        Log.Debug("Active products: {@ProductIds}", string.Join(", ", products.Select(x => x.Id)));
+        Log.Information("Found {Count} active products in the database.", products.Count);
+
+        var productLinks = products.Select(x => x.Link);
+
+        throw new NotImplementedException();
     }
 }

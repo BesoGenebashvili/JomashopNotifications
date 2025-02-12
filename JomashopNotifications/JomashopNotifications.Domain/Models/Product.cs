@@ -5,19 +5,35 @@ namespace JomashopNotifications.Domain.Models;
 
 public abstract record Product(Uri Link)
 {
-    public sealed record InStock(Uri Link, Money Price) : Product(Link);
-    public sealed record OutOfStock(Uri Link) : Product(Link);
-    public sealed record Error(Uri Link, string Message) : Product(Link);
+    public sealed record ToBeChecked(Uri Link) : Product(Link);
+
+    public abstract record Checked(ToBeChecked Reference) : Product(Reference.Link)
+    {
+        public sealed record InStock(ToBeChecked Reference, Money Price) : Checked(Reference);
+        public sealed record OutOfStock(ToBeChecked Reference) : Checked(Reference);
+        public sealed record Error(ToBeChecked Reference, string Message) : Checked(Reference);
+    }
 
     public override string ToString() => this switch
     {
-        InStock(var link, var price) => $"In stock, Link: {link.AbsoluteUri.AsBrief(40)}, Price: {price.Value}{price.Currency.AsSymbol()}",
-        OutOfStock(var link) => $"Out of stock, Link: {link.AbsoluteUri.AsBrief(40)}",
-        Error(var link) => $"Error, Link: {link.AbsoluteUri.AsBrief(40)}",
+        ToBeChecked(var link) => $"To be checked, Link: {link.AbsoluteUri.AsBrief(40)}",
+        Checked.InStock(var reference, var price) => $"In stock, Link: {reference.Link.AbsoluteUri.AsBrief(40)}, Price: {price.Value}{price.Currency.AsSymbol()}",
+        Checked.OutOfStock(var reference) => $"Out of stock, Link: {reference.Link.AbsoluteUri.AsBrief(40)}",
+        Checked.Error(var reference) => $"Error, Link: {reference.Link.AbsoluteUri.AsBrief(40)}",
         _ => throw new NotImplementedException(nameof(Product))
     };
+}
 
-    public static Product ParseFromHtml(Uri link, string html)
+public static class ProductExtensions
+{
+    public static Product.Checked.InStock InStock(this Product.ToBeChecked self, Money price) => new(self, price);
+    public static Product.Checked.OutOfStock OutOfStock(this Product.ToBeChecked self) => new(self);
+    public static Product.Checked.Error Error(this Product.ToBeChecked self, string message) => new(self, message);
+
+    // CheckedTime ->
+    public static Product.Checked ParseFromHtml(
+        this Product.ToBeChecked self,
+        string html)
     {
         const string StockAttributeName = "data-preload-product-stock-status";
 
@@ -32,18 +48,21 @@ public abstract record Product(Uri Link)
 
             return metaElement?.GetAttributeValue(StockAttributeName, null) switch
             {
-                "IN_STOCK" => new InStock(link, GetPrice(htmlDocument) ?? throw new InvalidOperationException("item does not contain a price")),
-                "OUT_OF_STOCK" => new OutOfStock(link),
+                "IN_STOCK" => self.InStock(GetPrice(htmlDocument)),
+                "OUT_OF_STOCK" => self.OutOfStock(),
                 null => throw new InvalidOperationException($"{StockAttributeName} does not contain a value"),
                 _ => throw new InvalidOperationException($"{StockAttributeName} contains an invalid value")
             };
         }
         catch (Exception ex)
         {
-            return new Error(link, ex.Message);
+            return self.Error(ex.Message);
         }
 
-        static Money? GetPrice(HtmlDocument htmlDocument)
+        static Money GetPrice(HtmlDocument htmlDocument) =>
+            TryGetPrice(htmlDocument) ?? throw new InvalidOperationException("item does not contain a price");
+
+        static Money? TryGetPrice(HtmlDocument htmlDocument)
         {
             const string PriceElementClass = "now-price";
 

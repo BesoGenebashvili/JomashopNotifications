@@ -6,25 +6,25 @@ using OpenQA.Selenium.Support.UI;
 
 namespace JomashopNotifications.Domain;
 
-public static class JomashopService
+public sealed class JomashopBrowserDriverService
 {
-    public static async IAsyncEnumerable<Either<Product, BrowserDriverError>> ParseProductsFromLinksAsync(IEnumerable<Uri> uris)
+    // Option for Edge/Google driver selection - appsettings.json
+    public async IAsyncEnumerable<Either<Product.Checked, BrowserDriverError>> ParseProductsFromLinksAsync(
+        IEnumerable<Product.ToBeChecked> productsToCheck)
     {
         using var chromeService = ResolveChromeDriverService();
         var chromeOptions = ResolveChromeOptions();
 
         using var driver = new ChromeDriver(chromeService, chromeOptions);
 
-        foreach (var uri in uris)
+        foreach (var productToCheck in productsToCheck)
         {
-            var errorOrHtml = await NavigateAndGetHtml(uri);
+            var htmlOrError = await NavigateAndGetHtml(productToCheck.Link);
 
-            yield return errorOrHtml.Match(
-                html => Either<Product, BrowserDriverError>.Left(
-                            Product.ParseFromHtml(
-                                    uri,
-                                    driver.PageSource)),
-                Either<Product, BrowserDriverError>.Right);
+            yield return htmlOrError.Match(
+                html => Either<Product.Checked, BrowserDriverError>.Left(
+                            productToCheck.ParseFromHtml(driver.PageSource)),
+                Either<Product.Checked, BrowserDriverError>.Right);
         }
 
         ChromeDriverService ResolveChromeDriverService()
@@ -59,6 +59,7 @@ public static class JomashopService
                             .GoToUrlAsync(uri);
 
                 WaitForPageLoad(driver);
+
                 await WaitToMimicHumanBehavior();
 
                 return Either<string, BrowserDriverError>.Left(driver.PageSource);

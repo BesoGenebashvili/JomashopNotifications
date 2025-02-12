@@ -1,18 +1,19 @@
-﻿using JomashopNotifications;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using JomashopNotifications.Persistence;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Domain;
+using JomashopNotifications.Domain.Models;
 
 Console.WriteLine("Hello, World!");
 
 var configuration = CreateConfiguration();
 using var serviceProvider = CreateServiceProvider(configuration);
 var productsDatabase = serviceProvider.GetRequiredService<IProductsDatabase>();
+var jomashopBrowserDriverService = serviceProvider.GetRequiredService<JomashopBrowserDriverService>();
 
 var products = await productsDatabase.ListAsync();
-var results = JomashopService.ParseProductsFromLinksAsync(products.Select(l => new Uri(l.Link)));
+var results = jomashopBrowserDriverService.ParseProductsFromLinksAsync(products.Select(l => new Product.ToBeChecked(new(l.Link))));
 
 await foreach (var result in results)
 {
@@ -39,4 +40,5 @@ static ServiceProvider CreateServiceProvider(IConfiguration configuration) =>
     new ServiceCollection()
             .AddSingleton(configuration)
             .AddPersistenceServices(configuration)
+            .AddDomainServices()
             .BuildServiceProvider();
