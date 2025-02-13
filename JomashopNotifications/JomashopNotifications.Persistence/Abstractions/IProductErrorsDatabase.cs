@@ -2,6 +2,6 @@
 
 public interface IProductErrorsDatabase
 {
-    Task<int> InsertAsync(int productId, string message);
+    Task<int> UpsertAsync(int productId, string message);
     Task<bool> DeleteAsync(int id);
 }

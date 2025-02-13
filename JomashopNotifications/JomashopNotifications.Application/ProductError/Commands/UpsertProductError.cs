@@ -11,7 +11,7 @@ public sealed class UpsertProductErrorCommandHandler(IProductErrorsDatabase prod
     public async Task<int> Handle(
         UpsertProductErrorCommand request,
         CancellationToken cancellationToken) =>
-        await productErrorsDatabase.InsertAsync(
+        await productErrorsDatabase.UpsertAsync(
             request.ProductId, 
             request.Message);
 }

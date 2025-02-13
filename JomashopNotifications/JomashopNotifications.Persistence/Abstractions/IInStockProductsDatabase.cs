@@ -2,6 +2,6 @@
 
 public interface IInStockProductsDatabase
 {
-    Task<int> InsertAsync(int productId, decimal price);
+    Task<int> UpsertAsync(int productId, decimal price);
     Task<bool> DeleteAsync(int id);
 }

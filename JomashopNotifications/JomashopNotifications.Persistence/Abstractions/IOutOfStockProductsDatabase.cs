@@ -2,6 +2,6 @@
 
 public interface IOutOfStockProductsDatabase
 {
-    Task<int> InsertAsync(int productId);
+    Task<int> UpsertAsync(int productId);
     Task<bool> DeleteAsync(int id);
 }

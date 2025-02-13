@@ -7,7 +7,7 @@ namespace JomashopNotifications.Persistence.Implementations;
 
 public sealed class ProductErrorsSqlDatabase(string ConnectionString) : IProductErrorsDatabase
 {
-    public async Task<int> InsertAsync(int productId, string message)
+    public async Task<int> UpsertAsync(int productId, string message)
     {
         using var connection = new SqlConnection(ConnectionString);
 
@@ -24,10 +24,21 @@ public sealed class ProductErrorsSqlDatabase(string ConnectionString) : IProduct
             direction: System.Data.ParameterDirection.Output);
 
         var sql = $"""
-                  INSERT INTO dbo.{DatabaseTable.ProductErrors} (ProductId, Message, CheckedAt)
-                  VALUES (@productId, @message, @checkedAt)
-                  SET @id = SCOPE_IDENTITY();
-                  """;
+                   IF EXISTS (SELECT 1 FROM dbo.{DatabaseTable.ProductErrors} WHERE ProductId = @productId)
+                       BEGIN
+                           UPDATE dbo.{DatabaseTable.ProductErrors} SET
+                               Message = @message, 
+                               CheckedAt = @checkedAt
+                           WHERE ProductId = @productId;
+                           SET @id = (SELECT Id FROM dbo.{DatabaseTable.ProductErrors} WHERE ProductId = @productId);
+                       END
+                   ELSE
+                       BEGIN
+                           INSERT INTO dbo.{DatabaseTable.ProductErrors} (ProductId, Message, CheckedAt)
+                           VALUES (@productId, @message, @checkedAt);
+                           SET @id = SCOPE_IDENTITY();
+                       END
+                   """;
 
         await connection.ExecuteAsync(sql, @params);
 

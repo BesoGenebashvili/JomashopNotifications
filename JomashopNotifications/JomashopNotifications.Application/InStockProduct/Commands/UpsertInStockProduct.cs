@@ -13,7 +13,7 @@ public sealed class UpsertInStockProductCommandHandler(IInStockProductsDatabase 
     public async Task<int> Handle(
         UpsertInStockProductCommand request,
         CancellationToken cancellationToken) =>
-        await inStockProductsDatabase.InsertAsync(
+        await inStockProductsDatabase.UpsertAsync(
             request.ProductId, 
             request.Price);
 }

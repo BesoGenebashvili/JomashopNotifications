@@ -11,5 +11,5 @@ public sealed class UpsertOutOfStockProductCommandHandler(IOutOfStockProductsDat
     public async Task<int> Handle(
         UpsertOutOfStockProductCommand request,
         CancellationToken cancellationToken) =>
-        await outOfStockProductsDatabase.InsertAsync(request.ProductId);
+        await outOfStockProductsDatabase.UpsertAsync(request.ProductId);
 }

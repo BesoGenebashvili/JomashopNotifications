@@ -7,7 +7,7 @@ namespace JomashopNotifications.Persistence.Implementations;
 
 public sealed class OutOfStockProductsSqlDatabase(string ConnectionString) : IOutOfStockProductsDatabase
 {
-    public async Task<int> InsertAsync(int productId)
+    public async Task<int> UpsertAsync(int productId)
     {
         using var connection = new SqlConnection(ConnectionString);
 
@@ -23,10 +23,20 @@ public sealed class OutOfStockProductsSqlDatabase(string ConnectionString) : IOu
             direction: System.Data.ParameterDirection.Output);
 
         var sql = $"""
-                  INSERT INTO dbo.{DatabaseTable.OutOfStockProducts} (ProductId, CheckedAt)
-                  VALUES (@productId, @checkedAt)
-                  SET @id = SCOPE_IDENTITY();
-                  """;
+                   IF EXISTS (SELECT 1 FROM dbo.{DatabaseTable.OutOfStockProducts} WHERE ProductId = @productId)
+                       BEGIN
+                           UPDATE dbo.{DatabaseTable.InStockProducts} SET
+                               CheckedAt = @checkedAt
+                           WHERE ProductId = @productId;
+                           SET @id = (SELECT Id FROM dbo.{DatabaseTable.OutOfStockProducts} WHERE ProductId = @productId);
+                       END
+                   ELSE
+                       BEGIN
+                           INSERT INTO dbo.{DatabaseTable.OutOfStockProducts} (ProductId, CheckedAt)
+                           VALUES (@productId, @checkedAt);
+                           SET @id = SCOPE_IDENTITY();
+                       END
+                   """;
 
         await connection.ExecuteAsync(sql, @params);
 
