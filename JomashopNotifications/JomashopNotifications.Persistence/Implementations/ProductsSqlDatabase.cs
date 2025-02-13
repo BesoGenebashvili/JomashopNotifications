@@ -3,6 +3,7 @@ using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Common;
 using JomashopNotifications.Persistence.Entities;
 using Microsoft.Data.SqlClient;
+using System.Text;
 
 namespace JomashopNotifications.Persistence.Implementations;
 
@@ -26,13 +27,21 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
         return await connection.QueryFirstOrDefaultAsync<ProductEntity>(sql, @params);
     }
 
-    public async Task<IEnumerable<ProductEntity>> ListAsync()
+    public async Task<IEnumerable<ProductEntity>> ListAsync(ProductStatus? status)
     {
         using var connection = new SqlConnection(ConnectionString);
 
-        var sql = $"SELECT * FROM dbo.{DatabaseTable.Products} WITH(NOLOCK)";
+        var @params = new DynamicParameters();
 
-        return await connection.QueryAsync<ProductEntity>(sql, CancellationToken.None);
+        var sql = new StringBuilder($"SELECT * FROM dbo.{DatabaseTable.Products} WITH(NOLOCK) WHERE 1 = 1");
+
+        if (status is { } statusValue)
+        {
+            sql.Append(" AND Status = @status");
+            @params.Add("@status", statusValue);
+        }
+
+        return await connection.QueryAsync<ProductEntity>(sql.ToString(), @params);
     }
 
     public async Task<int> InsertAsync(InsertProductEntity insertProductModel)

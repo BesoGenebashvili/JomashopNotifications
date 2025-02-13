@@ -3,7 +3,6 @@ using JomashopNotifications.Domain.Models;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
-using System.ComponentModel;
 
 namespace JomashopNotifications.Domain;
 
@@ -57,7 +56,7 @@ public sealed class JomashopBrowserDriverService
 
         async Task<Either<Product.Checked, BrowserDriverError>> CheckProductAsync(Product.ToBeChecked productToCheck)
         {
-            var htmlOrError = await NavigateAndGetHtml(productToCheck.Link);
+            var htmlOrError = await NavigateAndGetHtml(productToCheck);
 
             return htmlOrError.Match(
                      html => Either<Product.Checked, BrowserDriverError>.Left(
@@ -65,12 +64,12 @@ public sealed class JomashopBrowserDriverService
                      Either<Product.Checked, BrowserDriverError>.Right);
         }
 
-        async Task<Either<string, BrowserDriverError>> NavigateAndGetHtml(Uri uri)
+        async Task<Either<string, BrowserDriverError>> NavigateAndGetHtml(Product.ToBeChecked productToCheck)
         {
             try
             {
                 await driver.Navigate()
-                            .GoToUrlAsync(uri);
+                            .GoToUrlAsync(productToCheck.Link);
 
                 WaitForPageLoad(driver);
 
@@ -80,7 +79,7 @@ public sealed class JomashopBrowserDriverService
             }
             catch (Exception ex)
             {
-                return Either<string, BrowserDriverError>.Right(ex.FromException());
+                return Either<string, BrowserDriverError>.Right(ex.FromException(productToCheck.Id));
             }
         }
     }

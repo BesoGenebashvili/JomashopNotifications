@@ -13,10 +13,10 @@ using var serviceProvider = CreateServiceProvider(configuration);
 var productsDatabase = serviceProvider.GetRequiredService<IProductsDatabase>();
 var jomashopBrowserDriverService = serviceProvider.GetRequiredService<JomashopBrowserDriverService>();
 
-var products = await productsDatabase.ListAsync();
+var products = await productsDatabase.ListAsync(ProductStatus.Active);
 
 var productsToCheck = products.Where(p => p.Status is ProductStatus.Active && Uri.IsWellFormedUriString(p.Link, UriKind.Absolute))
-                              .Select(p => new Product.ToBeChecked(new(p.Link))).Take(2)
+                              .Select(p => new Product.ToBeChecked(p.Id, new(p.Link))).Take(2)
                               .ToList();
 
 var results = await jomashopBrowserDriverService.CheckProductsAsync(productsToCheck);
