@@ -3,6 +3,8 @@ using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
 using Microsoft.Extensions.Configuration;
 
+Console.WriteLine("Hello, World!");
+
 var configuration = CreateConfiguration();
 using var serviceProvider = CreateServiceProvider(configuration);
 using var serviceScope = serviceProvider.CreateScope();
@@ -11,7 +13,7 @@ var migration = serviceScope.ServiceProvider.GetRequiredService<Migration>();
 
 migration.Run();
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Migration was successful");
 
 static IConfiguration CreateConfiguration() =>
     new ConfigurationBuilder()
