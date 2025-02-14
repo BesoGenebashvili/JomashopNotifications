@@ -6,12 +6,6 @@ public enum ProductStatus : byte
     Inactive = 2
 }
 
-public sealed record InsertProductEntity
-{
-    public required string Link { get; init; }
-    public required ProductStatus Status { get; init; }
-}
-
 public sealed record ProductEntity
 {
     public int Id { get; init; }

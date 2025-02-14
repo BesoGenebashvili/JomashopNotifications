@@ -2,7 +2,7 @@
 using JomashopNotifications.Persistence.Common;
 using System.Collections.Immutable;
 
-namespace JomashopNotifications.Migration;
+namespace JomashopNotifications.Migration.TableSeedMigrations;
 
 [Migration(2)]
 public class ProductsTableSeedMigration : FluentMigrator.Migration

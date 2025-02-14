@@ -19,7 +19,7 @@ namespace JomashopNotifications.Persistence.Common
 
             var sql = $"""
                    DELETE FROM dbo.{table}
-                   WHERE Id = @id
+                   WHERE Id = @id;
                    """;
 
             return await connection.ExecuteAsync(sql, @params) > 0;

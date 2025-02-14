@@ -9,9 +9,9 @@ var configuration = CreateConfiguration();
 using var serviceProvider = CreateServiceProvider(configuration);
 using var serviceScope = serviceProvider.CreateScope();
 
-var migration = serviceScope.ServiceProvider.GetRequiredService<Migration>();
+var migrationRunner = serviceScope.ServiceProvider.GetRequiredService<MigrationRunner>();
 
-migration.Run();
+migrationRunner.Run();
 
 Console.WriteLine("Migration was successful");
 
@@ -32,5 +32,5 @@ static ServiceProvider CreateServiceProvider(IConfiguration configuration) =>
                    .WithGlobalConnectionString(configuration.GetConnectionString("DefaultConnection"))
                    .ScanIn(typeof(Program).Assembly).For.Migrations())
         .AddLogging(builder => builder.AddFluentMigratorConsole())
-        .AddTransient<Migration>()
+        .AddTransient<MigrationRunner>()
         .BuildServiceProvider(false);

@@ -25,7 +25,7 @@ public sealed class OutOfStockProductsSqlDatabase(string ConnectionString) : IOu
         var sql = $"""
                    IF EXISTS (SELECT 1 FROM dbo.{DatabaseTable.OutOfStockProducts} WHERE ProductId = @productId)
                        BEGIN
-                           UPDATE dbo.{DatabaseTable.InStockProducts} SET
+                           UPDATE dbo.{DatabaseTable.OutOfStockProducts} SET
                                CheckedAt = @checkedAt
                            WHERE ProductId = @productId;
                            SET @id = (SELECT Id FROM dbo.{DatabaseTable.OutOfStockProducts} WHERE ProductId = @productId);

@@ -47,7 +47,7 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
 
                         c.AddTrigger(o => o.ForJob(JomashopDataSyncJob.key)
                                            .WithIdentity(triggerName)
-                                           .WithSimpleSchedule(b => b.WithIntervalInMinutes(1) //For app: .WithIntervalInMinutes(options.RunEveryMinutes)
+                                           .WithSimpleSchedule(b => b.WithIntervalInMinutes(2) //For app: .WithIntervalInMinutes(options.RunEveryMinutes)
                                                                      .RepeatForever()));
                     }).AddQuartzHostedService(o => o.WaitForJobsToComplete = true);
         });

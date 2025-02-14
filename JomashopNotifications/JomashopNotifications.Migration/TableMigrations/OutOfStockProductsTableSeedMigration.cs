@@ -2,13 +2,13 @@
 using FluentMigrator;
 using JomashopNotifications.Persistence.Common;
 
-namespace JomashopNotifications.Migration;
+namespace JomashopNotifications.Migration.TableMigrations;
 
-[Migration(3)]
-public sealed class InStockProductsTableSeedMigration : FluentMigrator.Migration
+[Migration(4)]
+public sealed class OutOfStockProductsTableSeedMigration : FluentMigrator.Migration
 {
     public override void Up() =>
-        Create.Table(DatabaseTable.InStockProducts)
+        Create.Table(DatabaseTable.OutOfStockProducts)
               .WithColumn("Id").AsInt32()
                                .NotNullable()
                                .PrimaryKey()
@@ -17,11 +17,9 @@ public sealed class InStockProductsTableSeedMigration : FluentMigrator.Migration
                                       .NotNullable()
                                       .ForeignKey("Products", "Id")
                                       .OnDelete(Rule.Cascade)
-              .WithColumn("Price").AsDecimal()
-                                  .NotNullable()
               .WithColumn("CheckedAt").AsDateTime2()
                                       .NotNullable();
 
     public override void Down() =>
-        Delete.Table(DatabaseTable.InStockProducts);
+        Delete.Table(DatabaseTable.OutOfStockProducts);
 }

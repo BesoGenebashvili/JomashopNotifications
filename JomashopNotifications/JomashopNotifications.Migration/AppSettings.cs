@@ -2,6 +2,6 @@
 {
     public const string SectionName = "AppSettings";
 
-    public bool CreateDatabaseTables { get; init; }
-    public bool DeleteDatabaseTables { get; init; }
+    public required bool CreateDatabaseTables { get; init; }
+    public required bool DeleteDatabaseTables { get; init; }
 }

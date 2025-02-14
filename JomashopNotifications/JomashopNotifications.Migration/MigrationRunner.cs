@@ -1,7 +1,7 @@
 ﻿using FluentMigrator.Runner;
 using Microsoft.Extensions.Options;
 
-internal sealed class Migration(
+internal sealed class MigrationRunner(
     IMigrationRunner migrationRunner, 
     IOptions<AppSettings> appSettingsOptions)
 {

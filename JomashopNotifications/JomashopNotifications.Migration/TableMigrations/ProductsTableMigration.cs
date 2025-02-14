@@ -1,7 +1,7 @@
 ﻿using FluentMigrator;
 using JomashopNotifications.Persistence.Common;
 
-namespace JomashopNotifications.Migration;
+namespace JomashopNotifications.Migration.TableMigrations;
 
 [Migration(1)]
 public class ProductsTableMigration : FluentMigrator.Migration

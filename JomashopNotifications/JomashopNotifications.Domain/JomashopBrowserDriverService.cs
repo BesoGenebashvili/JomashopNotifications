@@ -26,7 +26,7 @@ public sealed class JomashopBrowserDriverService
             results.Add(result);
         }
 
-        driver.Close();
+        driver.Quit();
 
         return results;
 
@@ -90,5 +90,5 @@ public sealed class JomashopBrowserDriverService
                                                     .Equals("complete"));
 
     private static Task WaitToMimicHumanBehavior() =>
-        Task.Delay(new Random().Next(2000, 5000));
+        Task.Delay(new Random().Next(2000, 3000));
 }
