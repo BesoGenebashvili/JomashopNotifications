@@ -10,13 +10,15 @@ using JomashopNotifications.Application.Product.Contracts;
 using JomashopNotifications.Application.ProductError.Commands;
 using JomashopNotifications.Application.InStockProduct.Commands;
 using JomashopNotifications.Application.OutOfStockProduct.Commands;
+using JomashopNotifications.Persistence.Abstractions;
 
 namespace JomashopNotifications.Worker;
 
 [DisallowConcurrentExecution]
 public sealed class JomashopDataSyncJob(
     IMediator mediator,
-    JomashopBrowserDriverService browserDriverService) : IJob
+    JomashopBrowserDriverService browserDriverService,
+    IApplicationErrorsDatabase applicationErrorsDatabase) : IJob
 {
     public static readonly JobKey key =
         new(nameof(JomashopDataSyncJob), "DataSync");
@@ -54,7 +56,7 @@ public sealed class JomashopDataSyncJob(
 
         var productCheckResults = await browserDriverService.CheckProductsAsync(productsToCheck);
 
-        var (successfullyChecked, browserDriverErrors) = productCheckResults.Partition();
+        var (successfullyCheckedProducts, browserDriverErrors) = productCheckResults.Partition();
 
         if (browserDriverErrors.Any())
         {
@@ -62,30 +64,21 @@ public sealed class JomashopDataSyncJob(
                 "An error occurred while operating with the browser for products: {ProductIds}",
                 browserDriverErrors.Select(e => e.ProductId));
 
-            // AppErrors data table ?
+            await Task.WhenAll(
+                browserDriverErrors.Select(
+                    e => LogInApplicationErrorsDatabase(e.Exception)));
         }
 
-        var inStockProducts = successfullyChecked.OfType<Product.Checked.InStock>();
-        var OutOfStockProducts = successfullyChecked.OfType<Product.Checked.OutOfStock>();
-        var productErrors = successfullyChecked.OfType<Product.Checked.Error>();
+        var inStockProducts = successfullyCheckedProducts.OfType<Product.Checked.InStock>();
+        var OutOfStockProducts = successfullyCheckedProducts.OfType<Product.Checked.OutOfStock>();
+        var productErrors = successfullyCheckedProducts.OfType<Product.Checked.Error>();
 
-        Log.Debug("Successfully checked products: {ProductIds}", successfullyChecked.Select(p => p.Reference.Id));
+        Log.Debug("Successfully checked products: {ProductIds}", successfullyCheckedProducts.Select(p => p.Reference.Id));
         Log.Information("In stock products: {ProductIds}", inStockProducts.Select(p => p.Reference.Id));
         Log.Information("Out of stock products: {ProductIds}", OutOfStockProducts.Select(p => p.Reference.Id));
         Log.Information("Product errors: {ProductIds}", productErrors.Select(p => p.Reference.Id));
 
-        var upsertCommands = successfullyChecked.Select(p => mediator.Send(ResolveUpsertCommand(p)));
-
-        // More information on which products were upserted and which failed
-        try
-        {
-            await Task.WhenAll(upsertCommands);
-            Log.Information("Successfully upserted products");
-        }
-        catch (Exception ex)
-        {
-            Log.Error("An error occurred while upserting products. Error: {ex}", ex);
-        }
+        await UpsertSuccessfullyCheckedProducts();
 
         Task<List<ProductDto>> GetActiveProductsAsync() =>
             mediator.Send(
@@ -94,13 +87,52 @@ public sealed class JomashopDataSyncJob(
                     Status = ProductStatus.Active
                 });
 
-        static IRequest<int> ResolveUpsertCommand(Product.Checked @checked) =>
-            @checked switch
+        async Task UpsertSuccessfullyCheckedProducts()
+        {
+            foreach (var product in successfullyCheckedProducts)
             {
-                Product.Checked.InStock(var reference, var price) => new UpsertInStockProductCommand(reference.Id, price.Value),
-                Product.Checked.OutOfStock(var reference) => new UpsertOutOfStockProductCommand(reference.Id),
-                Product.Checked.Error(var reference, var message) => new UpsertProductErrorCommand(reference.Id, message),
-                _ => throw new NotImplementedException(nameof(Product.Checked))
-            };
+                var command = ResolveUpsertCommand(product);
+
+                try
+                {
+                    await mediator.Send(command);
+                    Log.Information("Successfully upserted product {ProductId}", product.Reference.Id);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(
+                        "An error occurred while upserting product {ProductId}. Error: {ex}",
+                        product.Reference.Id,
+                        ex);
+
+                    await LogInApplicationErrorsDatabase(ex);
+                }
+            }
+
+            static IRequest<int> ResolveUpsertCommand(Product.Checked @checked) =>
+                @checked switch
+                {
+                    Product.Checked.InStock({ Id: var pId }, var price, var checkedAt) => new UpsertInStockProductCommand(pId, price.Value, checkedAt),
+                    Product.Checked.OutOfStock({ Id: var pId }, var checkedAt) => new UpsertOutOfStockProductCommand(pId, checkedAt),
+                    Product.Checked.Error({ Id: var pId }, var message, var checkedAt) => new UpsertProductErrorCommand(pId, message, checkedAt),
+                    _ => throw new NotImplementedException(nameof(Product.Checked))
+                };
+        }
+
+    }
+
+    private async Task LogInApplicationErrorsDatabase(Exception exception)
+    {
+        try
+        {
+            await applicationErrorsDatabase.InsertAsync(
+                exception.ToString(),
+                exception.GetType()
+                         .ToString());
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal("An error occurred while logging an error in the application errors database. Error: {ex}", ex);
+        }
     }
 }

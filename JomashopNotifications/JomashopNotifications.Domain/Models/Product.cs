@@ -7,35 +7,43 @@ public abstract record Product(Uri Link)
 {
     public sealed record ToBeChecked(int Id, Uri Link) : Product(Link);
 
-    public abstract record Checked(ToBeChecked Reference) : Product(Reference.Link)
+    public abstract record Checked(ToBeChecked Reference, DateTime CheckedAt) : Product(Reference.Link)
     {
-        public sealed record InStock(ToBeChecked Reference, Money Price) : Checked(Reference);
-        public sealed record OutOfStock(ToBeChecked Reference) : Checked(Reference);
-        public sealed record Error(ToBeChecked Reference, string Message) : Checked(Reference);
+        public sealed record InStock(ToBeChecked Reference, Money Price, DateTime CheckedAt) : Checked(Reference, CheckedAt);
+        public sealed record OutOfStock(ToBeChecked Reference, DateTime CheckedAt) : Checked(Reference, CheckedAt);
+        public sealed record Error(ToBeChecked Reference, string Message, DateTime CheckedAt) : Checked(Reference, CheckedAt);
     }
 
     public string Show() => this switch
     {
-        ToBeChecked(var id, var link) => $"[To be checked], Id: {id}, Link: {link.AbsoluteUri.AsBrief()}",
-        Checked.InStock(var reference, var price) => $"[In stock], Link: {reference.Link.AbsoluteUri.AsBrief()}, Price: {price.Value}{price.Currency.AsSymbol()}",
-        Checked.OutOfStock(var reference) => $"[Out of stock], Link: {reference.Link.AbsoluteUri.AsBrief()}",
-        Checked.Error(var reference) => $"[Error], Link: {reference.Link.AbsoluteUri.AsBrief()}",
+        ToBeChecked(var id, { AbsoluteUri: var link }) =>
+            $"[To be checked] Id: {id}, Link: {link.AsBrief()}",
+
+        Checked.InStock({ Link.AbsoluteUri: var link }, var price, var checkedAt) =>
+            $"[In stock] CheckedAt: {checkedAt:MM-dd HH:mm:ss}, Link: {link.AsBrief()}, Price: {price.Value}{price.Currency.AsSymbol()}",
+
+        Checked.OutOfStock({ Link.AbsoluteUri: var link }, var checkedAt) =>
+            $"[Out of stock] CheckedAt: {checkedAt:MM-dd HH:mm:ss}, Link: {link.AsBrief()}",
+
+        Checked.Error({ Link.AbsoluteUri: var link }, var message, var checkedAt) =>
+            $"[Error] CheckedAt: {checkedAt:MM-dd HH:mm:ss}, Message: {message}, Link: {link.AsBrief()}",
+
         _ => throw new NotImplementedException(nameof(Product))
     };
 }
 
 public static class ProductExtensions
 {
-    public static Product.Checked.InStock InStock(this Product.ToBeChecked self, Money price) => new(self, price);
-    public static Product.Checked.OutOfStock OutOfStock(this Product.ToBeChecked self) => new(self);
-    public static Product.Checked.Error Error(this Product.ToBeChecked self, string message) => new(self, message);
+    public static Product.Checked.InStock InStock(this Product.ToBeChecked self, Money price, DateTime checkedAt) => new(self, price, checkedAt);
+    public static Product.Checked.OutOfStock OutOfStock(this Product.ToBeChecked self, DateTime checkedAt) => new(self, checkedAt);
+    public static Product.Checked.Error Error(this Product.ToBeChecked self, string message, DateTime checkedAt) => new(self, message, checkedAt);
 
-    // CheckedTime ->
     public static Product.Checked ParseFromHtml(
         this Product.ToBeChecked self,
         string html)
     {
         const string StockAttributeName = "data-preload-product-stock-status";
+        var now = DateTime.UtcNow;
 
         try
         {
@@ -46,17 +54,18 @@ public static class ProductExtensions
                                           .SelectSingleNode($"//meta[@{StockAttributeName}]")
                                           ?? throw new ArgumentException($"{StockAttributeName} was not found");
 
+
             return metaElement?.GetAttributeValue(StockAttributeName, null) switch
             {
-                "IN_STOCK" => self.InStock(GetPrice(htmlDocument)),
-                "OUT_OF_STOCK" => self.OutOfStock(),
+                "IN_STOCK" => self.InStock(GetPrice(htmlDocument), now),
+                "OUT_OF_STOCK" => self.OutOfStock(now),
                 null => throw new InvalidOperationException($"{StockAttributeName} does not contain a value"),
                 _ => throw new InvalidOperationException($"{StockAttributeName} contains an invalid value")
             };
         }
         catch (Exception ex)
         {
-            return self.Error(ex.Message);
+            return self.Error(ex.Message, now);
         }
 
         static Money GetPrice(HtmlDocument htmlDocument) =>
@@ -70,9 +79,13 @@ public static class ProductExtensions
                                         .SelectSingleNode($"//div[@class='{PriceElementClass}']")
                                         ?.ChildNodes
                                         ?.FirstOrDefault()
-                                        ?.InnerText ?? throw new ArgumentException("Price text does not contain a value");
+                                        ?.InnerText;
 
-            return Money.Parse(priceText);
+            return priceText switch
+            {
+                { Length: > 0 } when Money.TryParse(priceText, out var value) => value,
+                _ => null
+            };
         }
     }
 }

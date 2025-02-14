@@ -7,7 +7,7 @@ namespace JomashopNotifications.Persistence.Implementations;
 
 public sealed class ProductErrorsSqlDatabase(string ConnectionString) : IProductErrorsDatabase
 {
-    public async Task<int> UpsertAsync(int productId, string message)
+    public async Task<int> UpsertAsync(int productId, string message, DateTime checkedAt)
     {
         using var connection = new SqlConnection(ConnectionString);
 
@@ -15,7 +15,7 @@ public sealed class ProductErrorsSqlDatabase(string ConnectionString) : IProduct
         {
             productId,
             message,
-            checkedAt = DateTime.UtcNow
+            checkedAt
         });
 
         @params.Add(

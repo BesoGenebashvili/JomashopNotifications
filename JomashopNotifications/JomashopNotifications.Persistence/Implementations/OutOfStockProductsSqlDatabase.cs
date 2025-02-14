@@ -7,14 +7,14 @@ namespace JomashopNotifications.Persistence.Implementations;
 
 public sealed class OutOfStockProductsSqlDatabase(string ConnectionString) : IOutOfStockProductsDatabase
 {
-    public async Task<int> UpsertAsync(int productId)
+    public async Task<int> UpsertAsync(int productId, DateTime checkedAt)
     {
         using var connection = new SqlConnection(ConnectionString);
 
         var @params = new DynamicParameters(new
         {
             productId,
-            checkedAt = DateTime.UtcNow
+            checkedAt
         });
 
         @params.Add(

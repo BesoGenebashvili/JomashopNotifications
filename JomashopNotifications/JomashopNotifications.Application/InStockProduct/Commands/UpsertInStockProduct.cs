@@ -5,7 +5,8 @@ namespace JomashopNotifications.Application.InStockProduct.Commands;
 
 public sealed record UpsertInStockProductCommand(
     int ProductId, 
-    decimal Price) : IRequest<int>;
+    decimal Price,
+    DateTime CheckedAt) : IRequest<int>;
 
 public sealed class UpsertInStockProductCommandHandler(IInStockProductsDatabase inStockProductsDatabase)
     : IRequestHandler<UpsertInStockProductCommand, int>
@@ -15,5 +16,6 @@ public sealed class UpsertInStockProductCommandHandler(IInStockProductsDatabase 
         CancellationToken cancellationToken) =>
         await inStockProductsDatabase.UpsertAsync(
             request.ProductId, 
-            request.Price);
+            request.Price,
+            request.CheckedAt);
 }

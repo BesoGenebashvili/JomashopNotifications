@@ -7,7 +7,10 @@ namespace JomashopNotifications.Persistence.Implementations;
 
 public sealed class InStockProductsSqlDatabase(string ConnectionString) : IInStockProductsDatabase
 {
-    public async Task<int> UpsertAsync(int productId, decimal price)
+    public async Task<int> UpsertAsync(
+        int productId, 
+        decimal price,
+        DateTime checkedAt)
     {
         using var connection = new SqlConnection(ConnectionString);
 
@@ -15,7 +18,7 @@ public sealed class InStockProductsSqlDatabase(string ConnectionString) : IInSto
         {
             productId,
             price,
-            checkedAt = DateTime.UtcNow
+            checkedAt
         });
 
         @params.Add(

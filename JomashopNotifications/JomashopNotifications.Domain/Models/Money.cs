@@ -13,10 +13,14 @@ public sealed record Money(decimal Value, Currency Currency)
     {
         result = value.Trim() switch
         {
+            // $100
             ['$', .. var n] when decimal.TryParse(n.Trim(), out decimal v) => new(v, Currency.USD),
             ['€', .. var n] when decimal.TryParse(n.Trim(), out decimal v) => new(v, Currency.EUR),
+
+            // 100€
             [.. var n, '$'] when decimal.TryParse(n.Trim(), out decimal v) => new(v, Currency.USD),
             [.. var n, '€'] when decimal.TryParse(n.Trim(), out decimal v) => new(v, Currency.EUR),
+
             _ => null,
         };
 
