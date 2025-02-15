@@ -11,8 +11,35 @@ using JomashopNotifications.Application.ProductError.Commands;
 using JomashopNotifications.Application.InStockProduct.Commands;
 using JomashopNotifications.Application.OutOfStockProduct.Commands;
 using JomashopNotifications.Persistence.Abstractions;
+using JomashopNotifications.Application.InStockProduct.Queries;
 
 namespace JomashopNotifications.Worker;
+
+[DisallowConcurrentExecution]
+public sealed class InStockProductsCheckJob(
+    IMediator mediator,
+    IApplicationErrorsDatabase applicationErrorsDatabase) : IJob
+{
+    public async Task Execute(IJobExecutionContext context)
+    {
+        // Get all instock products
+        var inStockProductDtos = await mediator.Send(new ListInStockProductsQuery());
+
+        if (inStockProductDtos.Count == 0)
+        {
+            Log.Information("No in stock products found in the database");
+            return;
+        }
+
+        Log.Information(
+            "Found {Count} in stock products in the database. ProductIds: {ProductIds}",
+            inStockProductDtos.Count,
+            inStockProductDtos.Select(x => x.Id));
+
+        // Check for price if > than threshold -> send notification
+        // I need separate configuration table for this
+    }
+}
 
 [DisallowConcurrentExecution]
 public sealed class JomashopDataSyncJob(
@@ -23,7 +50,8 @@ public sealed class JomashopDataSyncJob(
     public static readonly JobKey key =
         new(nameof(JomashopDataSyncJob), "DataSync");
 
-    public async Task Execute(IJobExecutionContext context)
+    // I can pass cancellationToken from IJobExecutionContext to commands
+    public async Task Execute(IJobExecutionContext _)
     {
         var activeProducts = await GetActiveProductsAsync();
 
@@ -66,7 +94,13 @@ public sealed class JomashopDataSyncJob(
 
             await Task.WhenAll(
                 browserDriverErrors.Select(
-                    e => LogInApplicationErrorsDatabase(e.Exception)));
+                    e => applicationErrorsDatabase.LogAsync(e.Exception)));
+        }
+
+        if (!successfullyCheckedProducts.Any())
+        {
+            Log.Warning("No products were successfully checked");
+            return;
         }
 
         var inStockProducts = successfullyCheckedProducts.OfType<Product.Checked.InStock>();
@@ -105,7 +139,7 @@ public sealed class JomashopDataSyncJob(
                         product.Reference.Id,
                         ex);
 
-                    await LogInApplicationErrorsDatabase(ex);
+                    await applicationErrorsDatabase.LogAsync(ex);
                 }
             }
 
@@ -117,22 +151,6 @@ public sealed class JomashopDataSyncJob(
                     Product.Checked.Error({ Id: var pId }, var message, var checkedAt) => new UpsertProductErrorCommand(pId, message, checkedAt),
                     _ => throw new NotImplementedException(nameof(Product.Checked))
                 };
-        }
-
-    }
-
-    private async Task LogInApplicationErrorsDatabase(Exception exception)
-    {
-        try
-        {
-            await applicationErrorsDatabase.InsertAsync(
-                exception.ToString(),
-                exception.GetType()
-                         .ToString());
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal("An error occurred while logging an error in the application errors database. Error: {ex}", ex);
         }
     }
 }

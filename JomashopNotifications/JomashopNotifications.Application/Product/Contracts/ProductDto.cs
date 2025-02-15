@@ -2,7 +2,7 @@
 
 namespace JomashopNotifications.Application.Product.Contracts;
 
-public record ProductDto(
+public sealed record ProductDto(
     int Id,
     string Link,
     ProductStatus Status,
