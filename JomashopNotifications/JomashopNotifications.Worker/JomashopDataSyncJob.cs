@@ -36,8 +36,8 @@ public sealed class InStockProductsCheckJob(
             inStockProductDtos.Count,
             inStockProductDtos.Select(x => x.Id));
 
-        // Check for price if > than threshold -> send notification
-        // I need separate configuration table for this
+        // Check for price if > than threshold -> send notification - I need separate configuration table for this
+        // I need separate notification handlers like EmailNotificationHandler, SmsNotificationHandler, DesktipMessageNotificationHandler
     }
 }
 

@@ -1,3 +1,4 @@
+using JomashopNotifications.Api.Middleware;
 using JomashopNotifications.Application;
 using JomashopNotifications.Persistence;
 
@@ -18,6 +19,8 @@ app.MapGet("/", () => Results.Redirect("/swagger"))
 
 app.MapGet("/swagger", () => Results.Redirect("/swagger"))
    .ExcludeFromDescription();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
