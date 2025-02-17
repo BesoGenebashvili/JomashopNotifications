@@ -15,7 +15,7 @@ Accept: application/json
 Content-Type: application/json
 {
   "link" : "https://www.jomashop.com/mido-ocean-star-39-automatic-grey-gradient-dial-watch-m026-907-11-061-00.html",
-  "status": 1
+  "status": "Active"
 }
 
 ###

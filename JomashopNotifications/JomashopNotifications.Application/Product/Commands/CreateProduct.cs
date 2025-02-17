@@ -1,6 +1,7 @@
 ﻿using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Entities;
 using MediatR;
+using System.Text.Json.Serialization;
 
 //Add validation
 namespace JomashopNotifications.Application.Product.Commands;
@@ -8,6 +9,8 @@ namespace JomashopNotifications.Application.Product.Commands;
 public sealed record CreateProductCommand : IRequest<int>
 {
     public required string Link { get; init; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public required ProductStatus Status { get; init; } = ProductStatus.Active;
 }
 
