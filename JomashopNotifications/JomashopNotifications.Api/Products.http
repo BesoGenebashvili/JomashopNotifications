@@ -1,0 +1,34 @@
+@id = 1
+
+GET {{HostAddress}}/{{ProductsPath}}/{{id}}
+Accept: application/json
+
+###
+
+GET {{HostAddress}}/{{ProductsPath}}/list
+Accept: application/json
+
+###
+
+POST {{HostAddress}}/{{ProductsPath}}
+Accept: application/json
+Content-Type: application/json
+{
+  "link" : "https://www.jomashop.com/mido-ocean-star-39-automatic-grey-gradient-dial-watch-m026-907-11-061-00.html",
+  "status": 1
+}
+
+###
+
+PUT {{HostAddress}}/{{ProductsPath}}/activate/{{id}}
+Accept: application/json
+
+###
+
+PUT {{HostAddress}}/{{ProductsPath}}/deactivate/{{id}}
+Accept: application/json
+
+###
+
+DELETE {{HostAddress}}/{{ProductsPath}}/{{id}}
+Accept: application/json
