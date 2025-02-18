@@ -11,35 +11,8 @@ using JomashopNotifications.Application.ProductError.Commands;
 using JomashopNotifications.Application.InStockProduct.Commands;
 using JomashopNotifications.Application.OutOfStockProduct.Commands;
 using JomashopNotifications.Persistence.Abstractions;
-using JomashopNotifications.Application.InStockProduct.Queries;
 
 namespace JomashopNotifications.Worker;
-
-[DisallowConcurrentExecution]
-public sealed class InStockProductsCheckJob(
-    IMediator mediator,
-    IApplicationErrorsDatabase applicationErrorsDatabase) : IJob
-{
-    public async Task Execute(IJobExecutionContext context)
-    {
-        // Get all instock products
-        var inStockProductDtos = await mediator.Send(new ListInStockProductsQuery());
-
-        if (inStockProductDtos.Count == 0)
-        {
-            Log.Information("No in stock products found in the database");
-            return;
-        }
-
-        Log.Information(
-            "Found {Count} in stock products in the database. ProductIds: {ProductIds}",
-            inStockProductDtos.Count,
-            inStockProductDtos.Select(x => x.Id));
-
-        // Check for price if > than threshold -> send notification - I need separate configuration table for this
-        // I need separate notification handlers like EmailNotificationHandler, SmsNotificationHandler, DesktipMessageNotificationHandler
-    }
-}
 
 [DisallowConcurrentExecution]
 public sealed class JomashopDataSyncJob(
@@ -57,7 +30,7 @@ public sealed class JomashopDataSyncJob(
 
         if (activeProducts.Count == 0)
         {
-            Log.Information("No active products found in the database");
+            Log.Information("No active products were found in the database");
             return;
         }
 
