@@ -1,11 +1,11 @@
 ﻿using Quartz;
 using MediatR;
-using Serilog;
-using JomashopNotifications.Persistence.Abstractions;
-using JomashopNotifications.Application.InStockProduct.Queries;
 using MassTransit;
-using JomashopNotifications.Application.Product.Queries;
 using JomashopNotifications.Application.Messages;
+using JomashopNotifications.Application.Product.Queries;
+using JomashopNotifications.Application.InStockProduct.Queries;
+using JomashopNotifications.Persistence.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace JomashopNotifications.Worker;
 
@@ -13,15 +13,19 @@ namespace JomashopNotifications.Worker;
 public sealed class InStockProductsPublisherJob(
     IMediator mediator,
     IBus bus,
-    IApplicationErrorsDatabase applicationErrorsDatabase) : IJob
+    IApplicationErrorsDatabase applicationErrorsDatabase,
+    ILogger<InStockProductsPublisherJob> logger) : IJob
 {
+    public static readonly JobKey key =
+        new(nameof(JomashopDataSyncJob), "ProductsPublisher");
+
     public async Task Execute(IJobExecutionContext context)
     {
         var inStockProductDtos = await mediator.Send(new ListInStockProductsQuery());
 
         if (inStockProductDtos.Count == 0)
         {
-            Log.Information("No in stock products were found in the database");
+            logger.LogInformation("No in stock products were found in the database");
             return;
         }
 
@@ -35,11 +39,11 @@ public sealed class InStockProductsPublisherJob(
 
         if (!activeInStockProductDtos.Any())
         {
-            Log.Information("No active in stock products were found in the database");
+            logger.LogInformation("No active in stock products were found in the database");
             return;
         }
 
-        Log.Information(
+        logger.LogInformation(
             "Found {Count} active in stock products in the database. ProductIds: {ProductIds}",
             inStockProductDtos.Count,
             inStockProductDtos.Select(x => x.ProductId));
@@ -59,8 +63,8 @@ public sealed class InStockProductsPublisherJob(
                 CheckedAt = ip.CheckedAt
             });
 
-        Log.Information(
-            "Publishing {Count} product in stock events for ProductIds:",
+        logger.LogInformation(
+            "Publishing {Count} product in stock events for ProductIds: {ProductIds}",
             productInStockEvents.Count(),
             productInStockEvents.Select(e => e.ProductId));
 
@@ -72,7 +76,7 @@ public sealed class InStockProductsPublisherJob(
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to publish product in stock event for ProductId: {ProductId}", @event.ProductId);
+                logger.LogError(ex, "Failed to publish product in stock event for ProductId: {ProductId}", @event.ProductId);
                 await applicationErrorsDatabase.LogAsync(ex);
             }
         }

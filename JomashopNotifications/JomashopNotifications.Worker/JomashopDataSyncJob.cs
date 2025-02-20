@@ -1,6 +1,5 @@
 ﻿using Quartz;
 using MediatR;
-using Serilog;
 using JomashopNotifications.Domain;
 using JomashopNotifications.Domain.Common;
 using JomashopNotifications.Domain.Models;
@@ -11,6 +10,7 @@ using JomashopNotifications.Application.ProductError.Commands;
 using JomashopNotifications.Application.InStockProduct.Commands;
 using JomashopNotifications.Application.OutOfStockProduct.Commands;
 using JomashopNotifications.Persistence.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace JomashopNotifications.Worker;
 
@@ -18,7 +18,8 @@ namespace JomashopNotifications.Worker;
 public sealed class JomashopDataSyncJob(
     IMediator mediator,
     JomashopBrowserDriverService browserDriverService,
-    IApplicationErrorsDatabase applicationErrorsDatabase) : IJob
+    IApplicationErrorsDatabase applicationErrorsDatabase,
+    ILogger<JomashopDataSyncJob> logger) : IJob
 {
     public static readonly JobKey key =
         new(nameof(JomashopDataSyncJob), "DataSync");
@@ -30,11 +31,11 @@ public sealed class JomashopDataSyncJob(
 
         if (activeProducts.Count == 0)
         {
-            Log.Information("No active products were found in the database");
+            logger.LogInformation("No active products were found in the database");
             return;
         }
 
-        Log.Information(
+        logger.LogInformation(
             "Found {Count} active products in the database: {ProductIds}",
             activeProducts.Count,
             activeProducts.Select(x => x.Id));
@@ -43,7 +44,7 @@ public sealed class JomashopDataSyncJob(
 
         if (invalidActiveProducts.Any())
         {
-            Log.Warning(
+            logger.LogWarning(
                 "Found {Count} active products with invalid links: {ProductIds}",
                 invalidActiveProducts.Count(),
                 invalidActiveProducts.Select(p => p.Id));
@@ -61,7 +62,7 @@ public sealed class JomashopDataSyncJob(
 
         if (browserDriverErrors.Any())
         {
-            Log.Error(
+            logger.LogError(
                 "An error occurred while operating with the browser for products: {ProductIds}",
                 browserDriverErrors.Select(e => e.ProductId));
 
@@ -72,7 +73,7 @@ public sealed class JomashopDataSyncJob(
 
         if (!successfullyCheckedProducts.Any())
         {
-            Log.Warning("No products were successfully checked");
+            logger.LogWarning("No products were successfully checked");
             return;
         }
 
@@ -80,10 +81,10 @@ public sealed class JomashopDataSyncJob(
         var OutOfStockProducts = successfullyCheckedProducts.OfType<Product.Checked.OutOfStock>();
         var productErrors = successfullyCheckedProducts.OfType<Product.Checked.Error>();
 
-        Log.Debug("Successfully checked products: {ProductIds}", successfullyCheckedProducts.Select(p => p.Reference.Id));
-        Log.Information("In stock products: {ProductIds}", inStockProducts.Select(p => p.Reference.Id));
-        Log.Information("Out of stock products: {ProductIds}", OutOfStockProducts.Select(p => p.Reference.Id));
-        Log.Information("Product errors: {ProductIds}", productErrors.Select(p => p.Reference.Id));
+        logger.LogDebug("Successfully checked products: {ProductIds}", successfullyCheckedProducts.Select(p => p.Reference.Id));
+        logger.LogInformation("In stock products: {ProductIds}", inStockProducts.Select(p => p.Reference.Id));
+        logger.LogInformation("Out of stock products: {ProductIds}", OutOfStockProducts.Select(p => p.Reference.Id));
+        logger.LogInformation("Product errors: {ProductIds}", productErrors.Select(p => p.Reference.Id));
 
         await UpsertSuccessfullyCheckedProducts();
 
@@ -103,11 +104,11 @@ public sealed class JomashopDataSyncJob(
                 try
                 {
                     await mediator.Send(command);
-                    Log.Information("Successfully upserted product {ProductId}", product.Reference.Id);
+                    logger.LogInformation("Successfully upserted product {ProductId}", product.Reference.Id);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(
+                    logger.LogError(
                         "An error occurred while upserting product {ProductId}. Error: {ex}",
                         product.Reference.Id,
                         ex);

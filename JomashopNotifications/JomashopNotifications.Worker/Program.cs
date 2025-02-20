@@ -1,6 +1,7 @@
 ﻿using JomashopNotifications.Application;
 using JomashopNotifications.Domain;
 using JomashopNotifications.Persistence;
+using JomashopNotifications.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
