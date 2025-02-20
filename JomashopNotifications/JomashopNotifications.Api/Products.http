@@ -5,7 +5,11 @@ Accept: application/json
 
 ###
 
-GET {{HostAddress}}/{{ProductsPath}}/list
+@status = active
+@id1 = 1
+@id2 = 2
+@id3 = 4
+GET {{HostAddress}}/{{ProductsPath}}/list?status={{status}}&ids={{id1}}&ids={{id2}}&ids={{id3}}
 Accept: application/json
 
 ###

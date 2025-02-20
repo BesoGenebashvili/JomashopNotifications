@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using JomashopNotifications.Domain.Common;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Common;
 using JomashopNotifications.Persistence.Entities;
@@ -27,7 +28,7 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
         return await connection.QueryFirstOrDefaultAsync<ProductEntity>(sql, @params);
     }
 
-    public async Task<IEnumerable<ProductEntity>> ListAsync(ProductStatus? status)
+    public async Task<IEnumerable<ProductEntity>> ListAsync(ProductStatus? status, int[]? ids)
     {
         using var connection = new SqlConnection(ConnectionString);
 
@@ -39,6 +40,14 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
         {
             sql.Append(" AND Status = @status");
             @params.Add("@status", statusValue);
+        }
+
+        if (ids.NullIfEmpty() is { } idsValue)
+        {
+            var uniqueIds = idsValue.Distinct();
+
+            sql.Append(" AND Id IN @ids");
+            @params.Add("@ids", uniqueIds);
         }
 
         return await connection.QueryAsync<ProductEntity>(sql.ToString(), @params);

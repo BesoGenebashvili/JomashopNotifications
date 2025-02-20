@@ -1,6 +1,7 @@
 using JomashopNotifications.Application.Product.Commands;
 using JomashopNotifications.Application.Product.Contracts;
 using JomashopNotifications.Application.Product.Queries;
+using JomashopNotifications.Persistence.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,8 +20,13 @@ public sealed class ProductsController(IMediator mediator) : ControllerBase
         };
 
     [HttpGet("list")]
-    public async Task<ActionResult<List<ProductDto>>> ListAsync() =>
-        await mediator.Send(new ListProductsQuery());
+    public async Task<ActionResult<List<ProductDto>>> ListAsync([FromQuery] ProductStatus? status, [FromQuery] int[]? ids) =>
+        await mediator.Send(
+            new ListProductsQuery
+            {
+                Status = status,
+                Ids = ids
+            });
 
     [HttpPost]
     public async Task<ActionResult<int>> CreateAsync([FromBody] CreateProductCommand command)

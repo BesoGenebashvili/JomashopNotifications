@@ -13,4 +13,8 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\JomashopNotifications.Domain\JomashopNotifications.Domain.csproj" />
+	</ItemGroup>
+
 </Project>

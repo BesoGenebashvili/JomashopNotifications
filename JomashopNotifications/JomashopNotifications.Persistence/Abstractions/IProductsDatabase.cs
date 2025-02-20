@@ -5,7 +5,7 @@ namespace JomashopNotifications.Persistence.Abstractions;
 public interface IProductsDatabase
 {
     Task<ProductEntity?> GetAsync(int id);
-    Task<IEnumerable<ProductEntity>> ListAsync(ProductStatus? status);
+    Task<IEnumerable<ProductEntity>> ListAsync(ProductStatus? status, int[]? ids);
     Task<int> InsertAsync(InsertProductEntity insertProductModel);
     Task<bool> SetStatusAsActiveAsync(int id);
     Task<bool> SetStatusAsInactiveAsync(int id);

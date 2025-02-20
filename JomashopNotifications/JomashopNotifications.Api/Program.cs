@@ -3,6 +3,7 @@ using JomashopNotifications.Application;
 using JomashopNotifications.Persistence;
 using Microsoft.AspNetCore.HttpLogging;
 using Serilog;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,13 @@ builder.Services.AddHttpLogging(options =>
 
     options.CombineLogs = true;
 });
+
+// Enum values as strings in the response/request
+builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions
+                           .Converters
+                           .Add(new JsonStringEnumConverter()));
 
 var app = builder.Build();
 

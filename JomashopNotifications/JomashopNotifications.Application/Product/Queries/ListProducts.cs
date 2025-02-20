@@ -9,6 +9,7 @@ namespace JomashopNotifications.Application.Product.Queries;
 public sealed record ListProductsQuery : IRequest<List<ProductDto>>
 {
     public ProductStatus? Status { get; init; }
+    public int[]? Ids { get; init; }
 }
 
 public sealed class ListProductsQueryHandler(IProductsDatabase productsDatabase)
@@ -16,7 +17,7 @@ public sealed class ListProductsQueryHandler(IProductsDatabase productsDatabase)
 {
     public async Task<List<ProductDto>> Handle(ListProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = await productsDatabase.ListAsync(request.Status);
+        var products = await productsDatabase.ListAsync(request.Status, request.Ids);
 
         return products.Select(ProductExtensions.ToDto)
                        .ToList();
