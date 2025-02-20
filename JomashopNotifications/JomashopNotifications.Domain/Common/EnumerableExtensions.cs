@@ -1,6 +1,4 @@
-﻿using JomashopNotifications.Domain.Models;
-
-namespace JomashopNotifications.Domain.Common;
+﻿namespace JomashopNotifications.Domain.Common;
 
 public static class EnumerableExtensions
 {

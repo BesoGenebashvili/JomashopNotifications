@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace JomashopNotifications.Domain.Models;
+namespace JomashopNotifications.Domain.Common;
 
 public readonly record struct Either<TLeft, TRight>
 {
