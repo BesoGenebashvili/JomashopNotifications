@@ -33,7 +33,7 @@ public sealed class InStockProductsPublisherJob(
         {
             Status = Persistence.Entities.ProductStatus.Active,
             Ids = inStockProducts.Select(ip => ip.ProductId)
-                                    .ToArray()
+                                 .ToArray()
         });
 
         if (products.Count == 0)

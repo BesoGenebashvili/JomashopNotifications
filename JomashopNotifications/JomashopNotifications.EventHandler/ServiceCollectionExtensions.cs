@@ -2,6 +2,7 @@
 using JomashopNotifications.EventHandler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using JomashopNotifications.Application.Common;
 
 namespace JomashopNotifications.EventHandler;
 
@@ -32,10 +33,4 @@ public static class ServiceCollectionExtensions
             });
         });
     }
-
-    // Move this in App.Common
-    private static TOptions GetOptionsOrFail<TOptions>(this IConfiguration configuration, string sectionName) =>
-        configuration.GetSection(sectionName)
-                     .Get<TOptions>()
-                     ?? throw new InvalidOperationException($"Configuration section '{sectionName}' is missing.");
 }

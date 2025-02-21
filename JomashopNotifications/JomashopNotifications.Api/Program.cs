@@ -51,7 +51,7 @@ app.MapGet("/swagger/v1/swagger.json", () => Results.Ok())
 
 app.MapGet("/swagger/index.js", () => Results.Ok())
    .ExcludeFromDescription()
-.WithHttpLogging(HttpLoggingFields.None);
+   .WithHttpLogging(HttpLoggingFields.None);
 
 app.MapGet("/swagger/index.html", () => Results.Ok())
    .ExcludeFromDescription()

@@ -1,4 +1,5 @@
-﻿using JomashopNotifications.Worker;
+﻿using JomashopNotifications.Application.Common;
+using JomashopNotifications.Worker;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -70,9 +71,4 @@ public static class ServiceCollectionExtensions
             });
         });
     }
-
-    private static TOptions GetOptionsOrFail<TOptions>(this IConfiguration configuration, string sectionName) =>
-        configuration.GetSection(sectionName)
-                     .Get<TOptions>()
-                     ?? throw new InvalidOperationException($"Configuration section '{sectionName}' is missing.");
 }

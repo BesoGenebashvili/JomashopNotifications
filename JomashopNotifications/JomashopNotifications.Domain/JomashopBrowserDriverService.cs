@@ -1,22 +1,24 @@
 ﻿using JomashopNotifications.Domain.Common;
 using JomashopNotifications.Domain.Models;
+using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 
 namespace JomashopNotifications.Domain;
 
-public sealed class JomashopBrowserDriverService
+public sealed class JomashopBrowserDriverService(IOptions<ChromeOptions> chromeOptions)
 {
+    private readonly ChromeOptions _chromeOptions = chromeOptions.Value;
+
     // Option for Edge/Google driver selection - appsettings.json
     // IAsyncEnumerable? semaphore?
     public async Task<List<Either<Product.Checked, BrowserDriverError>>> CheckProductsAsync(
         IEnumerable<Product.ToBeChecked> productsToCheck)
     {
         using var chromeService = ResolveChromeDriverService();
-        var chromeOptions = ResolveChromeOptions();
 
-        using var driver = new ChromeDriver(chromeService, chromeOptions);
+        using var driver = new ChromeDriver(chromeService, _chromeOptions);
 
         var results = new List<Either<Product.Checked, BrowserDriverError>>();
 
@@ -38,20 +40,6 @@ public sealed class JomashopBrowserDriverService
             service.HideCommandPromptWindow = true;
 
             return service;
-        }
-
-        ChromeOptions ResolveChromeOptions()
-        {
-            var chromeOptions = new ChromeOptions();
-
-            chromeOptions.AddArguments(
-                "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", // To mimic real browser
-                "--host-resolver-rules=MAP ec2-52-23-111-175.compute-1.amazonaws.com 127.0.0.1",
-                "--headless", // Without UI
-                "--incognito", // Private
-                "--log-level=3"); // Without logs
-
-            return chromeOptions;
         }
 
         async Task<Either<Product.Checked, BrowserDriverError>> CheckProductAsync(Product.ToBeChecked productToCheck)
