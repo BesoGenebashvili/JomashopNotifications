@@ -21,23 +21,22 @@ public sealed class InStockProductsPublisherJob(
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var inStockProductDtos = await mediator.Send(new ListInStockProductsQuery());
+        var inStockProducts = await mediator.Send(new ListInStockProductsQuery());
 
-        if (inStockProductDtos.Count == 0)
+        if (inStockProducts.Count == 0)
         {
             logger.LogInformation("No in stock products were found in the database");
             return;
         }
 
-        // implement filtering with Ids
-        var productDtos = await mediator.Send(new ListProductsQuery()
+        var products = await mediator.Send(new ListProductsQuery()
         {
-            Status = Persistence.Entities.ProductStatus.Active
+            Status = Persistence.Entities.ProductStatus.Active,
+            Ids = inStockProducts.Select(ip => ip.ProductId)
+                                    .ToArray()
         });
 
-        var activeInStockProductDtos = inStockProductDtos.Where(ip => productDtos.Any(p => p.Id == ip.ProductId));
-
-        if (!activeInStockProductDtos.Any())
+        if (products.Count == 0)
         {
             logger.LogInformation("No active in stock products were found in the database");
             return;
@@ -45,11 +44,11 @@ public sealed class InStockProductsPublisherJob(
 
         logger.LogInformation(
             "Found {Count} active in stock products in the database. ProductIds: {ProductIds}",
-            inStockProductDtos.Count,
-            inStockProductDtos.Select(x => x.ProductId));
+            inStockProducts.Count,
+            inStockProducts.Select(x => x.ProductId));
 
-        var productInStockEvents = productDtos.Join(
-            inStockProductDtos,
+        var productInStockEvents = products.Join(
+            inStockProducts,
             p => p.Id,
             ip => ip.ProductId,
             (p, ip) => new ProductInStockEvent
@@ -83,5 +82,7 @@ public sealed class InStockProductsPublisherJob(
 
         // Check for price if > than threshold -> send notification - I need separate configuration table for this
         // I need separate notification handlers like EmailNotificationHandler, SmsNotificationHandler, DesktipMessageNotificationHandler
+        // WindowsToastNotificationHandler
+        // Error Queue
     }
 }

@@ -33,7 +33,7 @@ public sealed class ProductsController(IMediator mediator) : ControllerBase
     {
         var id = await mediator.Send(command);
 
-        return Created("/", new { id });
+        return Created($"/api/Products/{id}", id);
     }
 
     [HttpPut("activate/{id:int}")]
