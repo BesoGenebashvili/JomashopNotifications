@@ -5,6 +5,15 @@ namespace JomashopNotifications.Domain.Models;
 
 public abstract record Product(Uri Link)
 {
+    public sealed record ToEnrich(Uri Uri) : Product(Uri);
+
+    public abstract record Enriched(Uri Link)
+    {
+        public sealed record Success(ToEnrich Reference, string Brand, string Name) : Enriched(Reference.Uri);
+        public sealed record ParseError(ToEnrich Reference, string Message) : Enriched(Reference.Uri);
+    }
+
+    // Change this to ToCheck
     public sealed record ToBeChecked(int Id, string Brand, string Name, Uri Link) : Product(Link);
 
     public abstract record Checked(ToBeChecked Reference, DateTime CheckedAt) : Product(Reference.Link)
@@ -40,31 +49,38 @@ public static class ProductExtensions
     public static Product.Checked.OutOfStock OutOfStock(this Product.ToBeChecked self, DateTime checkedAt) => new(self, checkedAt);
     public static Product.Checked.Error Error(this Product.ToBeChecked self, string message, DateTime checkedAt) => new(self, message, checkedAt);
 
-    // Error ?
-    public static (string Brand, string Name) ParseFromHtml(string html)
+    public static Product.Enriched.ParseError ParseError(this Product.ToEnrich self, string message) => new(self, message);
+    public static Product.Enriched.Success Success(this Product.ToEnrich self, string brand, string name) => new(self, brand, name);
+
+    public static Product.Enriched ParseFromHtml(this Product.ToEnrich self, string html)
     {
         const string BrandElementClass = "brand-name";
         const string NameElementClass = "product-name";
 
-        var htmlDocument = new HtmlDocument();
-        htmlDocument.LoadHtml(html);
+        try
+        {
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(html);
 
-        var brand = htmlDocument.DocumentNode
-                                .SelectSingleNode($"//span[@class='{BrandElementClass}']")
-                                .InnerText
-                                .Trim(' ', '"');
+            var brand = htmlDocument.DocumentNode
+                                    .SelectSingleNode($"//span[@class='{BrandElementClass}']")
+                                    .InnerText
+                                    .Trim(' ', '"');
 
-        var name = htmlDocument.DocumentNode
-                               .SelectSingleNode($"//span[@class='{NameElementClass}']")
-                               .InnerText
-                               .Trim(' ', '"');
+            var name = htmlDocument.DocumentNode
+                                   .SelectSingleNode($"//span[@class='{NameElementClass}']")
+                                   .InnerText
+                                   .Trim(' ', '"');
 
-        return (brand, name);
+            return self.Success(brand, name);
+        }
+        catch (Exception ex)
+        {
+            return self.ParseError(ex.Message);
+        }
     }
 
-    public static Product.Checked ParseFromHtml(
-        this Product.ToBeChecked self,
-        string html)
+    public static Product.Checked ParseFromHtml(this Product.ToBeChecked self, string html)
     {
         const string StockAttributeName = "data-preload-product-stock-status";
         var now = DateTime.UtcNow;

@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using JomashopNotifications.Domain;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Entities;
+using Product = JomashopNotifications.Domain.Models.Product;
 
 namespace JomashopNotifications.Application.Product.Commands;
 
@@ -32,12 +33,19 @@ public sealed class CreateProductCommandHandler(
         var productFetchResults = await browserDriverService.FetchProductDataAsync(new(request.Link));
 
         return await productFetchResults.Match(
-            async brandAndName =>
+            async enriched =>
             {
+                var (brand, name) = enriched switch
+                {
+                    Domain.Models.Product.Enriched.Success(_, var b, var n) => (b, n),
+                    Domain.Models.Product.Enriched.ParseError(_, var error) => throw new Exception($"Error while parsing product data: {error}"),
+                    _ => throw new NotImplementedException(nameof(Domain.Models.Product)),
+                };
+
                 var insertEntity = new InsertProductEntity
                 {
-                    Brand = brandAndName.brand,
-                    Name = brandAndName.name,
+                    Brand = brand,
+                    Name = name,
                     Link = request.Link,
                     Status = request.Status
                 };

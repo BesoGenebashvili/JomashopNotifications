@@ -13,7 +13,7 @@ public sealed class JomashopBrowserDriverService(IOptions<ChromeOptions> chromeO
 {
     private readonly ChromeOptions _chromeOptions = chromeOptions.Value;
 
-    public async Task<Either<(string brand, string name), BrowserDriverError>> FetchProductDataAsync(Uri link)
+    public async Task<Either<Product.Enriched, BrowserDriverError>> FetchProductDataAsync(Uri link)
     {
         using var chromeService = ResolveChromeDriverService();
 
@@ -22,9 +22,10 @@ public sealed class JomashopBrowserDriverService(IOptions<ChromeOptions> chromeO
         var htmlOrError = await NavigateAndGetHtmlAsync(driver, link);
 
         return htmlOrError.Match(
-                html => Either<(string, string), BrowserDriverError>.Left(
-                            ProductExtensions.ParseFromHtml(html)),
-                Either<(string, string), BrowserDriverError>.Right);
+                html => Either<Product.Enriched, BrowserDriverError>.Left(
+                            new Product.ToEnrich(link)
+                                       .ParseFromHtml(html)),
+                Either<Product.Enriched, BrowserDriverError>.Right);
     }
 
     public async Task<List<Either<Product.Checked, (int id, BrowserDriverError error)>>> CheckProductsAsync(
