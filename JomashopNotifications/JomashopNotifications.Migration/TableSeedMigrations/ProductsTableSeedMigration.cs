@@ -1,5 +1,6 @@
 ﻿using FluentMigrator;
 using JomashopNotifications.Persistence.Common;
+using JomashopNotifications.Persistence.Entities;
 using System.Collections.Immutable;
 
 namespace JomashopNotifications.Migration.TableSeedMigrations;
@@ -27,7 +28,7 @@ public class ProductsTableSeedMigration : FluentMigrator.Migration
                               Brand = item.brand,
                               Name = item.name,
                               Link = item.link,
-                              Status = 1,
+                              Status = (int)ProductStatus.Active,
                               UpdatedAt = DateTime.UtcNow
                           }));
 

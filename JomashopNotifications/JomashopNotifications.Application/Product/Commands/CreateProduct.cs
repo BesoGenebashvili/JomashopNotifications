@@ -1,9 +1,9 @@
-﻿using JomashopNotifications.Persistence.Abstractions;
-using JomashopNotifications.Persistence.Entities;
-using MediatR;
+﻿using MediatR;
 using System.Text.Json.Serialization;
+using JomashopNotifications.Domain;
+using JomashopNotifications.Persistence.Abstractions;
+using JomashopNotifications.Persistence.Entities;
 
-//Add validation
 namespace JomashopNotifications.Application.Product.Commands;
 
 public sealed record CreateProductCommand : IRequest<int>
@@ -14,25 +14,36 @@ public sealed record CreateProductCommand : IRequest<int>
     public required ProductStatus Status { get; init; } = ProductStatus.Active;
 }
 
-public sealed class CreateProductCommandHandler(IProductsDatabase productsDatabase)
-    : IRequestHandler<CreateProductCommand, int>
+public sealed class CreateProductCommandHandler(
+    JomashopBrowserDriverService browserDriverService,
+    IProductsDatabase productsDatabase) : IRequestHandler<CreateProductCommand, int>
 {
     public async Task<int> Handle(
         CreateProductCommand request,
         CancellationToken cancellationToken)
     {
-        // fetch information from website
-        var brand = "";
-        var name = "";
-
-        var insertEntity = new InsertProductEntity
+        //Add validation
+        if (!Uri.IsWellFormedUriString(request.Link, UriKind.Absolute))
         {
-            Brand = brand,
-            Name = name,
-            Link = request.Link,
-            Status = request.Status
-        };
+            // ValidationException
+            throw new Exception("Invalid URL: Request.Link");
+        }
 
-        return await productsDatabase.InsertAsync(insertEntity);
+        var productFetchResults = await browserDriverService.FetchProductDataAsync(new(request.Link));
+
+        return await productFetchResults.Match(
+            async brandAndName =>
+            {
+                var insertEntity = new InsertProductEntity
+                {
+                    Brand = brandAndName.brand,
+                    Name = brandAndName.name,
+                    Link = request.Link,
+                    Status = request.Status
+                };
+
+                return await productsDatabase.InsertAsync(insertEntity);
+            },
+            error => throw new Exception($"Error while fetching product data: {error.Message}"));
     }
 }

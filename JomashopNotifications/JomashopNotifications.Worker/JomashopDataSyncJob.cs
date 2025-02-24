@@ -64,11 +64,11 @@ public sealed class JomashopDataSyncJob(
         {
             logger.LogError(
                 "An error occurred while operating with the browser for products: {ProductIds}",
-                browserDriverErrors.Select(e => e.ProductId));
+                browserDriverErrors.Select(e => e.id));
 
             await Task.WhenAll(
                 browserDriverErrors.Select(
-                    e => applicationErrorsDatabase.LogAsync(e.Exception)));
+                    e => applicationErrorsDatabase.LogAsync(e.error.Exception)));
         }
 
         if (!successfullyCheckedProducts.Any())

@@ -11,6 +11,8 @@ public abstract record Product(Uri Link)
     {
         public sealed record InStock(ToBeChecked Reference, Money Price, DateTime CheckedAt) : Checked(Reference, CheckedAt);
         public sealed record OutOfStock(ToBeChecked Reference, DateTime CheckedAt) : Checked(Reference, CheckedAt);
+
+        // Change this to ParseError
         public sealed record Error(ToBeChecked Reference, string Message, DateTime CheckedAt) : Checked(Reference, CheckedAt);
     }
 
@@ -37,6 +39,28 @@ public static class ProductExtensions
     public static Product.Checked.InStock InStock(this Product.ToBeChecked self, Money price, DateTime checkedAt) => new(self, price, checkedAt);
     public static Product.Checked.OutOfStock OutOfStock(this Product.ToBeChecked self, DateTime checkedAt) => new(self, checkedAt);
     public static Product.Checked.Error Error(this Product.ToBeChecked self, string message, DateTime checkedAt) => new(self, message, checkedAt);
+
+    // Error ?
+    public static (string Brand, string Name) ParseFromHtml(string html)
+    {
+        const string BrandElementClass = "brand-name";
+        const string NameElementClass = "product-name";
+
+        var htmlDocument = new HtmlDocument();
+        htmlDocument.LoadHtml(html);
+
+        var brand = htmlDocument.DocumentNode
+                                .SelectSingleNode($"//span[@class='{BrandElementClass}']")
+                                .InnerText
+                                .Trim(' ', '"');
+
+        var name = htmlDocument.DocumentNode
+                               .SelectSingleNode($"//span[@class='{NameElementClass}']")
+                               .InnerText
+                               .Trim(' ', '"');
+
+        return (brand, name);
+    }
 
     public static Product.Checked ParseFromHtml(
         this Product.ToBeChecked self,
@@ -76,10 +100,10 @@ public static class ProductExtensions
             const string PriceElementClass = "now-price";
 
             var priceText = htmlDocument.DocumentNode
-                                        .SelectSingleNode($"//div[@class='{PriceElementClass}']")
-                                        ?.ChildNodes
-                                        ?.FirstOrDefault()
-                                        ?.InnerText;
+                                        .SelectSingleNode($"//div[@class='{PriceElementClass}']")?
+                                        .ChildNodes?
+                                        .FirstOrDefault()?
+                                        .InnerText;
 
             return priceText switch
             {
