@@ -8,6 +8,8 @@ public static class ProductExtensions
 {
     public static ProductDto ToDto(this ProductEntity self) =>
         new(self.Id,
+            self.Brand,
+            self.Name,
             self.Link,
             self.Status,
             self.CreatedAt.ToLocalTime(),

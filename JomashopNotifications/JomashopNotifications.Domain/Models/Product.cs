@@ -5,7 +5,7 @@ namespace JomashopNotifications.Domain.Models;
 
 public abstract record Product(Uri Link)
 {
-    public sealed record ToBeChecked(int Id, Uri Link) : Product(Link);
+    public sealed record ToBeChecked(int Id, string Brand, string Name, Uri Link) : Product(Link);
 
     public abstract record Checked(ToBeChecked Reference, DateTime CheckedAt) : Product(Reference.Link)
     {
@@ -16,8 +16,8 @@ public abstract record Product(Uri Link)
 
     public string Show() => this switch
     {
-        ToBeChecked(var id, { AbsoluteUri: var link }) =>
-            $"[To be checked] Id: {id}, Link: {link.AsBrief()}",
+        ToBeChecked(var id, var brand, var name, { AbsoluteUri: var link }) =>
+            $"[To be checked] Id: {id}, Brand: {brand}, Name: {name}, Link: {link.AsBrief()}",
 
         Checked.InStock({ Link.AbsoluteUri: var link }, var price, var checkedAt) =>
             $"[In stock] CheckedAt: {checkedAt:MM-dd HH:mm:ss}, Link: {link.AsBrief()}, Price: {price.Value}{price.Currency.AsSymbol()}",

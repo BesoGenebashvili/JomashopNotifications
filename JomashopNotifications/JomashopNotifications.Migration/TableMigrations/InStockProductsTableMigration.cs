@@ -5,7 +5,7 @@ using JomashopNotifications.Persistence.Common;
 namespace JomashopNotifications.Migration.TableMigrations;
 
 [Migration(3)]
-public sealed class InStockProductsTableSeedMigration : FluentMigrator.Migration
+public sealed class InStockProductsTableMigration : FluentMigrator.Migration
 {
     public override void Up() =>
         Create.Table(DatabaseTable.InStockProducts)

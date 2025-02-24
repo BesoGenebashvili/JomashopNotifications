@@ -54,7 +54,7 @@ public sealed class JomashopDataSyncJob(
         }
 
         //                                            Extension?
-        var productsToCheck = activeProducts.Select(p => new Product.ToBeChecked(p.Id, new(p.Link)));
+        var productsToCheck = activeProducts.Select(p => new Product.ToBeChecked(p.Id, p.Brand, p.Name, new(p.Link)));
 
         var productCheckResults = await browserDriverService.CheckProductsAsync(productsToCheck);
 

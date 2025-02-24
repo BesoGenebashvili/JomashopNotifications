@@ -21,8 +21,14 @@ public sealed class CreateProductCommandHandler(IProductsDatabase productsDataba
         CreateProductCommand request,
         CancellationToken cancellationToken)
     {
+        // fetch information from website
+        var brand = "";
+        var name = "";
+
         var insertEntity = new InsertProductEntity
         {
+            Brand = brand,
+            Name = name,
             Link = request.Link,
             Status = request.Status
         };

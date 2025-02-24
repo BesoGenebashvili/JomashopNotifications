@@ -28,7 +28,7 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
         return await connection.QueryFirstOrDefaultAsync<ProductEntity>(sql, @params);
     }
 
-    public async Task<IEnumerable<ProductEntity>> ListAsync(ProductStatus? status, int[]? ids)
+    public async Task<IEnumerable<ProductEntity>> ListAsync(int[]? ids, ProductStatus? status)
     {
         using var connection = new SqlConnection(ConnectionString);
 
@@ -59,6 +59,8 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
 
         var @params = new DynamicParameters(new
         {
+            brand = insertProductModel.Brand,
+            name = insertProductModel.Name,
             link = insertProductModel.Link,
             status = insertProductModel.Status,
             updatedAt = DateTime.UtcNow
@@ -70,8 +72,8 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
             direction: System.Data.ParameterDirection.Output);
 
         var sql = $"""
-                  INSERT INTO dbo.{DatabaseTable.Products} (Link, Status, UpdatedAt)
-                  VALUES (@link, @status, @updatedAt)
+                  INSERT INTO dbo.{DatabaseTable.Products} (Brand, Name, Link, Status, UpdatedAt)
+                  VALUES (@brand, @name, @link, @status, @updatedAt)
                   SET @id = SCOPE_IDENTITY();
                   """;
 
