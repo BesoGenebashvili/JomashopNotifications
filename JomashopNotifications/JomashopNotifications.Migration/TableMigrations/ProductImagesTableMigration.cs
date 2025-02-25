@@ -19,7 +19,7 @@ public class ProductImagesTableMigration : FluentMigrator.Migration
                                       .OnDelete(Rule.Cascade)
               .WithColumn("IsPrimary").AsBoolean()
                                       .NotNullable()
-              .WithColumn("ImageData").AsBinary()
+              .WithColumn("ImageData").AsBinary(int.MaxValue)
                                       .NotNullable();
 
     public override void Down() =>

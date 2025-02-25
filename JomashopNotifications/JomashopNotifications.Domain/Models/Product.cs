@@ -3,6 +3,9 @@ using JomashopNotifications.Domain.Common;
 
 namespace JomashopNotifications.Domain.Models;
 
+// ProductImage type
+// IReadOnlyList
+
 public abstract record Product(Uri Link)
 {
     public sealed record ToEnrich(Uri Link) : Product(Link);
