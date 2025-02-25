@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IProductsDatabase>(_ => new ProductsSqlDatabase(connectionString));
         services.AddSingleton<IInStockProductsDatabase>(_ => new InStockProductsSqlDatabase(connectionString));
         services.AddSingleton<IOutOfStockProductsDatabase>(_ => new OutOfStockProductsSqlDatabase(connectionString));
-        services.AddSingleton<IProductErrorsDatabase>(_ => new ProductErrorsSqlDatabase(connectionString));
+        services.AddSingleton<IProductParseErrorsDatabase>(_ => new ProductParseErrorsSqlDatabase(connectionString));
         services.AddSingleton<IApplicationErrorsDatabase>(_ => new ApplicationErrorsSqlDatabase(connectionString));
 
         return services;

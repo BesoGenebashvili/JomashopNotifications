@@ -6,9 +6,9 @@ using JomashopNotifications.Domain.Models;
 using JomashopNotifications.Persistence.Entities;
 using JomashopNotifications.Application.Product.Queries;
 using JomashopNotifications.Application.Product.Contracts;
-using JomashopNotifications.Application.ProductError.Commands;
 using JomashopNotifications.Application.InStockProduct.Commands;
 using JomashopNotifications.Application.OutOfStockProduct.Commands;
+using JomashopNotifications.Application.ProductParseError.Commands;
 using JomashopNotifications.Persistence.Abstractions;
 using Microsoft.Extensions.Logging;
 
@@ -54,7 +54,7 @@ public sealed class JomashopDataSyncJob(
         }
 
         //                                            Extension?
-        var productsToCheck = activeProducts.Select(p => new Product.ToBeChecked(p.Id, p.Brand, p.Name, new(p.Link)));
+        var productsToCheck = activeProducts.Select(p => new Product.ToCheck(p.Id, new(p.Link)));
 
         var productCheckResults = await browserDriverService.CheckProductsAsync(productsToCheck);
 
@@ -79,7 +79,7 @@ public sealed class JomashopDataSyncJob(
 
         var inStockProducts = successfullyCheckedProducts.OfType<Product.Checked.InStock>();
         var OutOfStockProducts = successfullyCheckedProducts.OfType<Product.Checked.OutOfStock>();
-        var productErrors = successfullyCheckedProducts.OfType<Product.Checked.Error>();
+        var productErrors = successfullyCheckedProducts.OfType<Product.Checked.ParseError>();
 
         logger.LogDebug("Successfully checked products: {ProductIds}", successfullyCheckedProducts.Select(p => p.Reference.Id));
         logger.LogInformation("In stock products: {ProductIds}", inStockProducts.Select(p => p.Reference.Id));
@@ -122,7 +122,7 @@ public sealed class JomashopDataSyncJob(
                 {
                     Product.Checked.InStock({ Id: var pId }, var price, var checkedAt) => new UpsertInStockProductCommand(pId, price.Value, checkedAt),
                     Product.Checked.OutOfStock({ Id: var pId }, var checkedAt) => new UpsertOutOfStockProductCommand(pId, checkedAt),
-                    Product.Checked.Error({ Id: var pId }, var message, var checkedAt) => new UpsertProductErrorCommand(pId, message, checkedAt),
+                    Product.Checked.ParseError({ Id: var pId }, var message, var checkedAt) => new UpsertProductParseErrorCommand(pId, message, checkedAt),
                     _ => throw new NotImplementedException(nameof(Product.Checked))
                 };
         }

@@ -6,6 +6,6 @@ public static class DatabaseTable
     public const string ProductImages = "ProductImages";
     public const string InStockProducts = "InStockProducts";
     public const string OutOfStockProducts = "OutOfStockProducts";
-    public const string ProductErrors = "ProductErrors";
+    public const string ProductParseErrors = "ProductParseErrors";
     public const string ApplicationErrors = "ApplicationErrors";
 }

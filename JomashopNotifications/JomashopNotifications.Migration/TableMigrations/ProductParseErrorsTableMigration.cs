@@ -5,10 +5,10 @@ using JomashopNotifications.Persistence.Common;
 namespace JomashopNotifications.Migration.TableMigrations;
 
 [Migration(5)]
-public sealed class ProductErrorsTableMigration : FluentMigrator.Migration
+public sealed class ProductParseErrorsTableMigration : FluentMigrator.Migration
 {
     public override void Up() =>
-        Create.Table(DatabaseTable.ProductErrors)
+        Create.Table(DatabaseTable.ProductParseErrors)
               .WithColumn("Id").AsInt32()
                                .NotNullable()
                                .PrimaryKey()
@@ -23,5 +23,5 @@ public sealed class ProductErrorsTableMigration : FluentMigrator.Migration
                                       .NotNullable();
 
     public override void Down() =>
-        Delete.Table(DatabaseTable.ProductErrors);
+        Delete.Table(DatabaseTable.ProductParseErrors);
 }

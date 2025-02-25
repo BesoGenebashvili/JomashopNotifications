@@ -29,7 +29,7 @@ public sealed class JomashopBrowserDriverService(IOptions<ChromeOptions> chromeO
     }
 
     public async Task<List<Either<Product.Checked, (int id, BrowserDriverError error)>>> CheckProductsAsync(
-        IEnumerable<Product.ToBeChecked> productsToCheck)
+        IEnumerable<Product.ToCheck> productsToCheck)
     {
         using var chromeService = ResolveChromeDriverService();
 
@@ -47,7 +47,7 @@ public sealed class JomashopBrowserDriverService(IOptions<ChromeOptions> chromeO
 
         return results;
 
-        async Task<Either<Product.Checked, (int id, BrowserDriverError error)>> CheckProductAsync(Product.ToBeChecked productToCheck)
+        async Task<Either<Product.Checked, (int id, BrowserDriverError error)>> CheckProductAsync(Product.ToCheck productToCheck)
         {
             var htmlOrError = await NavigateAndGetHtmlAsync(driver, productToCheck.Link);
 

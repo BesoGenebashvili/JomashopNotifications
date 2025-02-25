@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 
 namespace JomashopNotifications.Persistence.Implementations;
 
-public sealed class ProductErrorsSqlDatabase(string ConnectionString) : IProductErrorsDatabase
+public sealed class ProductParseErrorsSqlDatabase(string ConnectionString) : IProductParseErrorsDatabase
 {
     public async Task<int> UpsertAsync(int productId, string message, DateTime checkedAt)
     {
@@ -24,17 +24,17 @@ public sealed class ProductErrorsSqlDatabase(string ConnectionString) : IProduct
             direction: System.Data.ParameterDirection.Output);
 
         var sql = $"""
-                   IF EXISTS (SELECT 1 FROM dbo.{DatabaseTable.ProductErrors} WHERE ProductId = @productId)
+                   IF EXISTS (SELECT 1 FROM dbo.{DatabaseTable.ProductParseErrors} WHERE ProductId = @productId)
                        BEGIN
-                           UPDATE dbo.{DatabaseTable.ProductErrors} SET
+                           UPDATE dbo.{DatabaseTable.ProductParseErrors} SET
                                Message = @message, 
                                CheckedAt = @checkedAt
                            WHERE ProductId = @productId;
-                           SET @id = (SELECT Id FROM dbo.{DatabaseTable.ProductErrors} WHERE ProductId = @productId);
+                           SET @id = (SELECT Id FROM dbo.{DatabaseTable.ProductParseErrors} WHERE ProductId = @productId);
                        END
                    ELSE
                        BEGIN
-                           INSERT INTO dbo.{DatabaseTable.ProductErrors} (ProductId, Message, CheckedAt)
+                           INSERT INTO dbo.{DatabaseTable.ProductParseErrors} (ProductId, Message, CheckedAt)
                            VALUES (@productId, @message, @checkedAt);
                            SET @id = SCOPE_IDENTITY();
                        END
@@ -48,6 +48,6 @@ public sealed class ProductErrorsSqlDatabase(string ConnectionString) : IProduct
     public Task<bool> DeleteAsync(int id) =>
         SqlDatabaseExtensions.DeleteFromTableAsync(
             ConnectionString, 
-            DatabaseTable.ProductErrors, 
+            DatabaseTable.ProductParseErrors, 
             id);
 }

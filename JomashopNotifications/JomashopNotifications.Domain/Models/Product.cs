@@ -3,9 +3,7 @@ using JomashopNotifications.Domain.Common;
 
 namespace JomashopNotifications.Domain.Models;
 
-// ProductImage type
-// IReadOnlyList
-
+// add IReadOnlyList ProductImages type
 public abstract record Product(Uri Link)
 {
     public sealed record ToEnrich(Uri Link) : Product(Link);
@@ -16,17 +14,13 @@ public abstract record Product(Uri Link)
         public sealed record ParseError(ToEnrich Reference, string Message) : Enriched(Reference.Link);
     }
 
-    // Change this to ToCheck
-    // Remove Brand and name from here.
-    public sealed record ToBeChecked(int Id, string Brand, string Name, Uri Link) : Product(Link);
+    public sealed record ToCheck(int Id, Uri Link) : Product(Link);
 
-    public abstract record Checked(ToBeChecked Reference, DateTime CheckedAt) : Product(Reference.Link)
+    public abstract record Checked(ToCheck Reference, DateTime CheckedAt) : Product(Reference.Link)
     {
-        public sealed record InStock(ToBeChecked Reference, Money Price, DateTime CheckedAt) : Checked(Reference, CheckedAt);
-        public sealed record OutOfStock(ToBeChecked Reference, DateTime CheckedAt) : Checked(Reference, CheckedAt);
-
-        // Change this to ParseError
-        public sealed record Error(ToBeChecked Reference, string Message, DateTime CheckedAt) : Checked(Reference, CheckedAt);
+        public sealed record InStock(ToCheck Reference, Money Price, DateTime CheckedAt) : Checked(Reference, CheckedAt);
+        public sealed record OutOfStock(ToCheck Reference, DateTime CheckedAt) : Checked(Reference, CheckedAt);
+        public sealed record ParseError(ToCheck Reference, string Message, DateTime CheckedAt) : Checked(Reference, CheckedAt);
     }
 
     public string Show() => this switch
@@ -40,8 +34,8 @@ public abstract record Product(Uri Link)
         Enriched.ParseError({ Link.AbsoluteUri: var link }, var message) =>
             $"[Error while enriching] Message: {message}, Link: {link.AsBrief()}",
 
-        ToBeChecked(var id, var brand, var name, { AbsoluteUri: var link }) =>
-            $"[To be checked] Id: {id}, Brand: {brand}, Name: {name}, Link: {link.AsBrief()}",
+        ToCheck(var id, { AbsoluteUri: var link }) =>
+            $"[To check] Id: {id}, Link: {link.AsBrief()}",
 
         Checked.InStock({ Link.AbsoluteUri: var link }, var price, var checkedAt) =>
             $"[In stock] CheckedAt: {checkedAt:MM-dd HH:mm:ss}, Link: {link.AsBrief()}, Price: {price.Value}{price.Currency.AsSymbol()}",
@@ -49,7 +43,7 @@ public abstract record Product(Uri Link)
         Checked.OutOfStock({ Link.AbsoluteUri: var link }, var checkedAt) =>
             $"[Out of stock] CheckedAt: {checkedAt:MM-dd HH:mm:ss}, Link: {link.AsBrief()}",
 
-        Checked.Error({ Link.AbsoluteUri: var link }, var message, var checkedAt) =>
+        Checked.ParseError({ Link.AbsoluteUri: var link }, var message, var checkedAt) =>
             $"[Error] CheckedAt: {checkedAt:MM-dd HH:mm:ss}, Message: {message}, Link: {link.AsBrief()}",
 
         _ => throw new NotImplementedException(nameof(Product))
@@ -58,9 +52,9 @@ public abstract record Product(Uri Link)
 
 public static class ProductExtensions
 {
-    public static Product.Checked.InStock InStock(this Product.ToBeChecked self, Money price, DateTime checkedAt) => new(self, price, checkedAt);
-    public static Product.Checked.OutOfStock OutOfStock(this Product.ToBeChecked self, DateTime checkedAt) => new(self, checkedAt);
-    public static Product.Checked.Error Error(this Product.ToBeChecked self, string message, DateTime checkedAt) => new(self, message, checkedAt);
+    public static Product.Checked.InStock InStock(this Product.ToCheck self, Money price, DateTime checkedAt) => new(self, price, checkedAt);
+    public static Product.Checked.OutOfStock OutOfStock(this Product.ToCheck self, DateTime checkedAt) => new(self, checkedAt);
+    public static Product.Checked.ParseError ParseError(this Product.ToCheck self, string message, DateTime checkedAt) => new(self, message, checkedAt);
 
     public static Product.Enriched.ParseError ParseError(this Product.ToEnrich self, string message) => new(self, message);
     public static Product.Enriched.Success Success(this Product.ToEnrich self, string brand, string name) => new(self, brand, name);
@@ -93,7 +87,7 @@ public static class ProductExtensions
         }
     }
 
-    public static Product.Checked ParseFromHtml(this Product.ToBeChecked self, string html)
+    public static Product.Checked ParseFromHtml(this Product.ToCheck self, string html)
     {
         const string StockAttributeName = "data-preload-product-stock-status";
         var now = DateTime.UtcNow;
@@ -118,7 +112,7 @@ public static class ProductExtensions
         }
         catch (Exception ex)
         {
-            return self.Error(ex.Message, now);
+            return self.ParseError(ex.Message, now);
         }
 
         static Money GetPrice(HtmlDocument htmlDocument) =>
