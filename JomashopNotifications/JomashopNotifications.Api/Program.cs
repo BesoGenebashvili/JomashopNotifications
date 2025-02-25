@@ -1,5 +1,6 @@
 using JomashopNotifications.Api.Middleware;
 using JomashopNotifications.Application;
+using JomashopNotifications.Domain;
 using JomashopNotifications.Persistence;
 using Microsoft.AspNetCore.HttpLogging;
 using Serilog;
@@ -8,6 +9,7 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDomainServices();
 builder.Services.AddApplicationServices();
 builder.Services.AddPersistenceServices(builder.Configuration);
 

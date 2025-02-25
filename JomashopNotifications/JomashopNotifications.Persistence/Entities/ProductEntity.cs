@@ -15,4 +15,5 @@ public sealed record ProductEntity
     public ProductStatus Status { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
+    public required List<ProductImageEntity> Images { get; init; } = [];
 }

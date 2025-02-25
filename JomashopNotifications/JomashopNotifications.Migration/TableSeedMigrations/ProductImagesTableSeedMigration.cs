@@ -7,13 +7,13 @@ namespace JomashopNotifications.Migration.TableSeedMigrations;
 [Migration(8)]
 public class ProductImagesTableSeedMigration : FluentMigrator.Migration
 {
-    private static readonly string imageFolderPath = 
+    private static readonly string imageFolderPath =
         Path.Combine(Directory.GetCurrentDirectory(), "Images");
 
     private static byte[] ReadImage(string fileName) =>
         File.ReadAllBytes(Path.Combine(imageFolderPath, fileName));
 
-    private ImmutableList<(int productId, bool isPrimary, byte[] imageData)> ResolveRecords() =>
+    private static ImmutableList<(int productId, bool isPrimary, byte[] imageData)> ResolveRecords =>
         [
             // Orient
             (1, true, ReadImage("orient - 1 (primary).jpg")),
@@ -27,7 +27,7 @@ public class ProductImagesTableSeedMigration : FluentMigrator.Migration
         ];
 
     public override void Up() =>
-        ResolveRecords().ForEach(
+        ResolveRecords.ForEach(
             item => Insert.IntoTable(DatabaseTable.ProductImages)
                           .Row(new
                           {

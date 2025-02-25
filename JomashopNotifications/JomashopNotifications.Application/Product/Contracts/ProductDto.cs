@@ -9,4 +9,5 @@ public sealed record ProductDto(
     string Link,
     ProductStatus Status,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    IReadOnlyList<ProductImageDto> ProductImages);

@@ -21,11 +21,46 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
         };
 
         var sql = $"""
-                  SELECT * FROM dbo.{DatabaseTable.Products} WITH(NOLOCK) 
-                  WHERE Id = @id
+                  SELECT
+                        p.Id,
+                        p.Brand,
+                        p.Name,
+                        p.Link,
+                        p.Status,
+                        p.CreatedAt,
+                        p.UpdatedAt,
+                        pi.IsPrimary,
+                        pi.ImageData
+                  FROM dbo.{DatabaseTable.Products} p WITH(NOLOCK)
+                  LEFT JOIN dbo.{DatabaseTable.ProductImages} pi WITH(NOLOCK) ON p.Id = pi.ProductId
+                  WHERE p.Id = @id
                   """;
 
-        return await connection.QueryFirstOrDefaultAsync<ProductEntity>(sql, @params);
+        var products = await connection.QueryAsync<ProductEntity, ProductImageEntity, ProductEntity>(
+                                            sql,
+                                            (product, image) =>
+                                            {
+                                                product.Images.Add(image);
+                                                return product;
+                                            },
+                                            @params,
+                                            splitOn: "IsPrimary");
+
+        return products.GroupBy(p => p.Id)
+                       .Select(g =>
+                       {
+                           var groupedProduct = g.First();
+
+                           groupedProduct = groupedProduct with
+                           {
+                               Images = g.Where(p => p.Images.SingleOrDefault() is not null)
+                                         .Select(p => p.Images.Single())
+                                         .ToList()
+                           };
+
+                           return groupedProduct;
+                       })
+                       .SingleOrDefault();
     }
 
     public async Task<IEnumerable<ProductEntity>> ListAsync(int[]? ids, ProductStatus? status)
