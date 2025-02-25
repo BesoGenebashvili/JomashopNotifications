@@ -15,7 +15,7 @@ public sealed class InStockProductsTableMigration : FluentMigrator.Migration
                                .Identity()
               .WithColumn("ProductId").AsInt32()
                                       .NotNullable()
-                                      .ForeignKey("Products", "Id")
+                                      .ForeignKey(DatabaseTable.Products, "Id")
                                       .OnDelete(Rule.Cascade)
               .WithColumn("Price").AsDecimal()
                                   .NotNullable()

@@ -15,7 +15,7 @@ public sealed class OutOfStockProductsTableMigration : FluentMigrator.Migration
                                .Identity()
               .WithColumn("ProductId").AsInt32()
                                       .NotNullable()
-                                      .ForeignKey("Products", "Id")
+                                      .ForeignKey(DatabaseTable.Products, "Id")
                                       .OnDelete(Rule.Cascade)
               .WithColumn("CheckedAt").AsDateTime2()
                                       .NotNullable();

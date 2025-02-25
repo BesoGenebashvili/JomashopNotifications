@@ -1,14 +1,14 @@
-﻿using System.Data;
-using FluentMigrator;
+﻿using FluentMigrator;
 using JomashopNotifications.Persistence.Common;
+using System.Data;
 
 namespace JomashopNotifications.Migration.TableMigrations;
 
-[Migration(5)]
-public sealed class ProductErrorsTableMigration : FluentMigrator.Migration
+[Migration(7)]
+public class ProductImagesTableMigration : FluentMigrator.Migration
 {
     public override void Up() =>
-        Create.Table(DatabaseTable.ProductErrors)
+        Create.Table(DatabaseTable.ProductImages)
               .WithColumn("Id").AsInt32()
                                .NotNullable()
                                .PrimaryKey()
@@ -17,11 +17,11 @@ public sealed class ProductErrorsTableMigration : FluentMigrator.Migration
                                       .NotNullable()
                                       .ForeignKey(DatabaseTable.Products, "Id")
                                       .OnDelete(Rule.Cascade)
-              .WithColumn("Message").AsString()
-                                    .NotNullable()
-              .WithColumn("CheckedAt").AsDateTime2()
+              .WithColumn("IsPrimary").AsBoolean()
+                                      .NotNullable()
+              .WithColumn("ImageData").AsBinary()
                                       .NotNullable();
 
     public override void Down() =>
-        Delete.Table(DatabaseTable.ProductErrors);
+        Delete.Table(DatabaseTable.ProductImages);
 }

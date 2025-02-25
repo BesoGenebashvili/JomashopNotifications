@@ -5,15 +5,16 @@ namespace JomashopNotifications.Domain.Models;
 
 public abstract record Product(Uri Link)
 {
-    public sealed record ToEnrich(Uri Uri) : Product(Uri);
+    public sealed record ToEnrich(Uri Link) : Product(Link);
 
-    public abstract record Enriched(Uri Link)
+    public abstract record Enriched(Uri Link) : Product(Link)
     {
-        public sealed record Success(ToEnrich Reference, string Brand, string Name) : Enriched(Reference.Uri);
-        public sealed record ParseError(ToEnrich Reference, string Message) : Enriched(Reference.Uri);
+        public sealed record Success(ToEnrich Reference, string Brand, string Name) : Enriched(Reference.Link);
+        public sealed record ParseError(ToEnrich Reference, string Message) : Enriched(Reference.Link);
     }
 
     // Change this to ToCheck
+    // Remove Brand and name from here.
     public sealed record ToBeChecked(int Id, string Brand, string Name, Uri Link) : Product(Link);
 
     public abstract record Checked(ToBeChecked Reference, DateTime CheckedAt) : Product(Reference.Link)
@@ -27,6 +28,15 @@ public abstract record Product(Uri Link)
 
     public string Show() => this switch
     {
+        ToEnrich({ AbsoluteUri: var link }) => 
+            $"[To enrich] Link: {link.AsBrief()}",
+
+        Enriched.Success({ Link.AbsoluteUri: var link }, var brand, var name) => 
+            $"[Successfully enriched] Brand: {brand}, Name: {name}, Link: {link.AsBrief()}",
+
+        Enriched.ParseError({ Link.AbsoluteUri: var link }, var message) =>
+            $"[Error while enriching] Message: {message}, Link: {link.AsBrief()}",
+
         ToBeChecked(var id, var brand, var name, { AbsoluteUri: var link }) =>
             $"[To be checked] Id: {id}, Brand: {brand}, Name: {name}, Link: {link.AsBrief()}",
 
