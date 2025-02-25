@@ -47,7 +47,8 @@ public sealed class CreateProductCommandHandler(
                     Brand = brand,
                     Name = name,
                     Link = request.Link,
-                    Status = request.Status
+                    Status = request.Status,
+                    Images = [] // Implement image parsing
                 };
 
                 return await productsDatabase.InsertAsync(insertEntity);
