@@ -4,6 +4,7 @@ using JomashopNotifications.Domain;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Entities;
 using Product = JomashopNotifications.Domain.Models.Product;
+using Microsoft.Extensions.Logging;
 
 namespace JomashopNotifications.Application.Product.Commands;
 
@@ -17,7 +18,8 @@ public sealed record CreateProductCommand : IRequest<int>
 
 public sealed class CreateProductCommandHandler(
     JomashopBrowserDriverService browserDriverService,
-    IProductsDatabase productsDatabase) : IRequestHandler<CreateProductCommand, int>
+    IProductsDatabase productsDatabase,
+    ILogger<CreateProductCommandHandler> logger) : IRequestHandler<CreateProductCommand, int>
 {
     public async Task<int> Handle(
         CreateProductCommand request,
@@ -35,12 +37,24 @@ public sealed class CreateProductCommandHandler(
         return await productFetchResults.Match(
             async enriched =>
             {
-                var (brand, name) = enriched switch
+                var (brand, name, images) = enriched switch
                 {
-                    Domain.Models.Product.Enriched.Success(_, var b, var n) => (b, n),
+                    Domain.Models.Product.Enriched.Success(_, var b, var n, var i) => (b, n, i),
                     Domain.Models.Product.Enriched.ParseError(_, var error) => throw new Exception($"Error while parsing product data: {error}"),
                     _ => throw new NotImplementedException(nameof(Domain.Models.Product)),
                 };
+
+                var downloadImages = images.Select(i => DownloadImageBytesAsync(i.ImageLink));
+
+                var imageBytes = await Task.WhenAll(downloadImages);
+
+                var imageEntities = images.Zip(imageBytes)
+                                          .Select(t => new ProductImageEntity
+                                          {
+                                              IsPrimary = t.First.IsPrimary,
+                                              ImageData = t.Second
+                                          })
+                                          .ToList();
 
                 var insertEntity = new InsertProductEntity
                 {
@@ -48,11 +62,28 @@ public sealed class CreateProductCommandHandler(
                     Name = name,
                     Link = request.Link,
                     Status = request.Status,
-                    Images = [] // Implement image parsing
+                    Images = imageEntities
                 };
 
                 return await productsDatabase.InsertAsync(insertEntity);
             },
             error => throw new Exception($"Error while fetching product data: {error.Message}"));
+    }
+
+    private async Task<byte[]> DownloadImageBytesAsync(Uri link)
+    {
+        try
+        {
+            logger.LogInformation("Downloading image from {Link}", link);
+
+            using var client = new HttpClient();
+            return await client.GetByteArrayAsync(link);
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation(ex, "Error while downloading image from {Link}", link);
+            // Log error in Error database?
+            throw;
+        }
     }
 }

@@ -1,16 +1,26 @@
-﻿using HtmlAgilityPack;
+﻿#pragma warning disable IDE0055
+
+using HtmlAgilityPack;
 using JomashopNotifications.Domain.Common;
 
 namespace JomashopNotifications.Domain.Models;
 
-// add IReadOnlyList ProductImages type
+// In Product?
+public sealed record ProductImage(
+    bool IsPrimary,
+    Uri ImageLink)
+{
+    public static ProductImage Primary(Uri imageLink) => new(true, imageLink);
+    public static ProductImage Secondary(Uri imageLink) => new(false, imageLink);
+}
+
 public abstract record Product(Uri Link)
 {
     public sealed record ToEnrich(Uri Link) : Product(Link);
 
     public abstract record Enriched(Uri Link) : Product(Link)
     {
-        public sealed record Success(ToEnrich Reference, string Brand, string Name) : Enriched(Reference.Link);
+        public sealed record Success(ToEnrich Reference, string Brand, string Name, IReadOnlyList<ProductImage> Images) : Enriched(Reference.Link);
         public sealed record ParseError(ToEnrich Reference, string Message) : Enriched(Reference.Link);
     }
 
@@ -25,11 +35,11 @@ public abstract record Product(Uri Link)
 
     public string Show() => this switch
     {
-        ToEnrich({ AbsoluteUri: var link }) => 
+        ToEnrich({ AbsoluteUri: var link }) =>
             $"[To enrich] Link: {link.AsBrief()}",
 
-        Enriched.Success({ Link.AbsoluteUri: var link }, var brand, var name) => 
-            $"[Successfully enriched] Brand: {brand}, Name: {name}, Link: {link.AsBrief()}",
+        Enriched.Success({ Link.AbsoluteUri: var link }, var brand, var name, { Count: var imageCount }) =>
+            $"[Successfully enriched] Brand: {brand}, Name: {name}, Image count: {imageCount}, Link: {link.AsBrief()}",
 
         Enriched.ParseError({ Link.AbsoluteUri: var link }, var message) =>
             $"[Error while enriching] Message: {message}, Link: {link.AsBrief()}",
@@ -57,12 +67,18 @@ public static class ProductExtensions
     public static Product.Checked.ParseError ParseError(this Product.ToCheck self, string message, DateTime checkedAt) => new(self, message, checkedAt);
 
     public static Product.Enriched.ParseError ParseError(this Product.ToEnrich self, string message) => new(self, message);
-    public static Product.Enriched.Success Success(this Product.ToEnrich self, string brand, string name) => new(self, brand, name);
+    public static Product.Enriched.Success Success(
+        this Product.ToEnrich self,
+        string brand,
+        string name,
+        IReadOnlyList<ProductImage> images) => new(self, brand, name, images);
 
     public static Product.Enriched ParseFromHtml(this Product.ToEnrich self, string html)
     {
         const string BrandElementClass = "brand-name";
         const string NameElementClass = "product-name";
+        const string ImageGalleryElementClass = "image-main__gallery";
+        const string ImageAttributeName = "src";
 
         try
         {
@@ -79,7 +95,22 @@ public static class ProductExtensions
                                    .InnerText
                                    .Trim(' ', '"');
 
-            return self.Success(brand, name);
+            var imageUris = htmlDocument.DocumentNode
+                                        .SelectSingleNode($"//div[@class='{ImageGalleryElementClass}']")?
+                                        .SelectNodes(".//img")?
+                                        .Select(n => n.GetAttributeValue(ImageAttributeName, null))
+                                        .Where(a => a is not null && Uri.IsWellFormedUriString(a, UriKind.Absolute))
+                                        .Select(u => new Uri(u))
+                                        .ToArray();
+
+            ProductImage[] images = imageUris switch
+            {
+                [var primary] => [ProductImage.Primary(primary)],
+                [var primary, .. var secondaries] => [ProductImage.Primary(primary), .. secondaries.Select(ProductImage.Secondary)],
+                _ => []
+            };
+
+            return self.Success(brand, name, images);
         }
         catch (Exception ex)
         {
