@@ -11,7 +11,7 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
 {
     public Task Consume(ConsumeContext<ProductInStockEvent> context)
     {
-        // TODO: Update Windows toast notification
+        // TODO: Update Windows toast notification to handle 'OnActivated' event
 
         var message = context.Message;
 
@@ -32,7 +32,6 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
         return Task.CompletedTask;
     }
 
-    // CCY?
     public static void ShowToastNotification(
         string brand,
         string name,
@@ -55,7 +54,7 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
                 .AddAttributionText($"Checked at {checkedAt:M, HH:dd:ss}")
                 .AddButton(new ToastButtonDismiss())
                 .SetToastDuration(ToastDuration.Long)
-                .SetToastScenario(ToastScenario.Reminder);
+                .SetToastScenario(ToastScenario.Default);
 
         toastNotification.Show();
 

@@ -15,8 +15,17 @@ public static class ServiceCollectionExtensions
 
         return services.AddQuartz(configurator =>
                 {
-                    ConfigureJomashopDataSyncJob(configurator);
-                    ConfigureInStockProductsPublisherJob(configurator);
+                    if (workerOptions.JomashopDataSyncJobOptions.IsActive)
+                    {
+                        Console.WriteLine($"Configuring [{nameof(JomashopDataSyncJob)}] -> {workerOptions.JomashopDataSyncJobOptions.RunEveryMinutes} min");
+                        ConfigureJomashopDataSyncJob(configurator);
+                    }
+
+                    if (workerOptions.InStockProductsPublisherJobOptions.IsActive)
+                    {
+                        Console.WriteLine($"Configuring [{nameof(InStockProductsPublisherJob)}] -> {workerOptions.InStockProductsPublisherJobOptions.RunEveryMinutes} min");
+                        ConfigureInStockProductsPublisherJob(configurator);
+                    }
                 })
                 .AddQuartzHostedService(o => o.WaitForJobsToComplete = true);
 

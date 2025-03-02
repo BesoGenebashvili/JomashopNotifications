@@ -1,7 +1,7 @@
 ﻿namespace JomashopNotifications.Worker;
 
-public sealed record JomashopDataSyncJobOptions(int RunEveryMinutes);
-public sealed record InStockProductsPublisherJobOptions(int RunEveryMinutes);
+public sealed record JomashopDataSyncJobOptions(bool IsActive, int RunEveryMinutes);
+public sealed record InStockProductsPublisherJobOptions(bool IsActive, int RunEveryMinutes);
 
 public record WorkerOptions
 {
