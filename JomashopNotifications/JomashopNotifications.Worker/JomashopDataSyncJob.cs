@@ -3,7 +3,6 @@ using MediatR;
 using JomashopNotifications.Domain;
 using JomashopNotifications.Domain.Common;
 using JomashopNotifications.Domain.Models;
-using JomashopNotifications.Persistence.Entities;
 using JomashopNotifications.Application.Product.Queries;
 using JomashopNotifications.Application.Product.Contracts;
 using JomashopNotifications.Application.InStockProduct.Commands;
@@ -11,6 +10,7 @@ using JomashopNotifications.Application.OutOfStockProduct.Commands;
 using JomashopNotifications.Application.ProductParseError.Commands;
 using JomashopNotifications.Persistence.Abstractions;
 using Microsoft.Extensions.Logging;
+using JomashopNotifications.Persistence.Entities.Product;
 
 namespace JomashopNotifications.Worker;
 
@@ -120,7 +120,7 @@ public sealed class JomashopDataSyncJob(
             static IRequest<int> ResolveUpsertCommand(Product.Checked @checked) =>
                 @checked switch
                 {
-                    Product.Checked.InStock({ Id: var pId }, var price, var checkedAt) => new UpsertInStockProductCommand(pId, price.Value, checkedAt),
+                    Product.Checked.InStock({ Id: var pId }, var price, var checkedAt) => new UpsertInStockProductCommand(pId, price.Value, price.Currency, checkedAt),
                     Product.Checked.OutOfStock({ Id: var pId }, var checkedAt) => new UpsertOutOfStockProductCommand(pId, checkedAt),
                     Product.Checked.ParseError({ Id: var pId }, var message, var checkedAt) => new UpsertProductParseErrorCommand(pId, message, checkedAt),
                     _ => throw new NotImplementedException(nameof(Product.Checked))

@@ -1,6 +1,6 @@
 ﻿using FluentMigrator;
 using JomashopNotifications.Persistence.Common;
-using JomashopNotifications.Persistence.Entities;
+using JomashopNotifications.Persistence.Entities.Product;
 using System.Collections.Immutable;
 
 namespace JomashopNotifications.Migration.TableSeedMigrations;

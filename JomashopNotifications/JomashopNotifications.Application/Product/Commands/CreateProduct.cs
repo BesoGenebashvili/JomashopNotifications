@@ -4,6 +4,7 @@ using JomashopNotifications.Domain;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Entities;
 using Microsoft.Extensions.Logging;
+using JomashopNotifications.Persistence.Entities.Product;
 
 namespace JomashopNotifications.Application.Product.Commands;
 

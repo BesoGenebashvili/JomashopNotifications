@@ -1,7 +1,8 @@
 ﻿using Dapper;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Common;
-using JomashopNotifications.Persistence.Entities;
+using JomashopNotifications.Persistence.Entities.InStockProduct;
+using JomashopNotifications.Persistence.Entities.Product;
 using Microsoft.Data.SqlClient;
 
 namespace JomashopNotifications.Persistence.Implementations;
@@ -17,18 +18,16 @@ public sealed class InStockProductsSqlDatabase(string ConnectionString) : IInSto
         return await connection.QueryAsync<InStockProductEntity>(sql.ToString());
     }
 
-    public async Task<int> UpsertAsync(
-        int productId, 
-        decimal price,
-        DateTime checkedAt)
+    public async Task<int> UpsertAsync(UpsertInStockProductEntity productEntity)
     {
         using var connection = new SqlConnection(ConnectionString);
 
         var @params = new DynamicParameters(new
         {
-            productId,
-            price,
-            checkedAt
+            productId = productEntity.ProductId,
+            price = productEntity.Price,
+            currency = productEntity.Currency,
+            checkedAt = productEntity.CheckedAt
         });
 
         @params.Add(
@@ -40,15 +39,16 @@ public sealed class InStockProductsSqlDatabase(string ConnectionString) : IInSto
                    IF EXISTS (SELECT 1 FROM dbo.{DatabaseTable.InStockProducts} WHERE ProductId = @productId)
                        BEGIN
                            UPDATE dbo.{DatabaseTable.InStockProducts} SET
-                               Price = @price, 
+                               Price = @price,
+                               Currency = @currency,
                                CheckedAt = @checkedAt
                            WHERE ProductId = @productId;
                            SET @id = (SELECT Id FROM dbo.{DatabaseTable.InStockProducts} WHERE ProductId = @productId);
                        END
                    ELSE
                        BEGIN
-                           INSERT INTO dbo.{DatabaseTable.InStockProducts} (ProductId, Price, CheckedAt)
-                           VALUES (@productId, @price, @checkedAt);
+                           INSERT INTO dbo.{DatabaseTable.InStockProducts} (ProductId, Price, Currency, CheckedAt)
+                           VALUES (@productId, @price, @currency, @checkedAt);
                            SET @id = SCOPE_IDENTITY();
                        END
                    """;

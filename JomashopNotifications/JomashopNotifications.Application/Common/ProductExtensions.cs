@@ -1,6 +1,6 @@
 ﻿using JomashopNotifications.Application.InStockProduct.Contracts;
 using JomashopNotifications.Application.Product.Contracts;
-using JomashopNotifications.Persistence.Entities;
+using JomashopNotifications.Persistence.Entities.Product;
 using System.Collections.ObjectModel;
 
 namespace JomashopNotifications.Application.Common;

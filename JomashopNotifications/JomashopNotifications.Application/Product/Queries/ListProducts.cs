@@ -2,7 +2,7 @@
 using JomashopNotifications.Application.Product.Contracts;
 using JomashopNotifications.Application.Common;
 using JomashopNotifications.Persistence.Abstractions;
-using JomashopNotifications.Persistence.Entities;
+using JomashopNotifications.Persistence.Entities.Product;
 
 namespace JomashopNotifications.Application.Product.Queries;
 

@@ -1,4 +1,4 @@
-﻿using JomashopNotifications.Persistence.Entities;
+﻿using JomashopNotifications.Persistence.Entities.Product;
 
 namespace JomashopNotifications.Persistence.Abstractions;
 

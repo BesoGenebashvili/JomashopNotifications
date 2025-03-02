@@ -19,6 +19,8 @@ public sealed class InStockProductsTableMigration : FluentMigrator.Migration
                                       .OnDelete(Rule.Cascade)
               .WithColumn("Price").AsDecimal()
                                   .NotNullable()
+              .WithColumn("Currency").AsString(3)
+                                     .NotNullable()
               .WithColumn("CheckedAt").AsDateTime2()
                                       .NotNullable();
 

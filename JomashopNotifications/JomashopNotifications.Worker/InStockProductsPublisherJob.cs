@@ -6,6 +6,7 @@ using JomashopNotifications.Application.Product.Queries;
 using JomashopNotifications.Application.InStockProduct.Queries;
 using JomashopNotifications.Persistence.Abstractions;
 using Microsoft.Extensions.Logging;
+using JomashopNotifications.Persistence.Entities.Product;
 
 namespace JomashopNotifications.Worker;
 
@@ -31,7 +32,7 @@ public sealed class InStockProductsPublisherJob(
 
         var products = await mediator.Send(new ListProductsQuery()
         {
-            Status = Persistence.Entities.ProductStatus.Active,
+            Status = ProductStatus.Active,
             Ids = inStockProducts.Select(ip => ip.ProductId)
                                  .ToArray()
         });

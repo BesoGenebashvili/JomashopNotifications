@@ -2,7 +2,7 @@
 using JomashopNotifications.Domain.Common;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Common;
-using JomashopNotifications.Persistence.Entities;
+using JomashopNotifications.Persistence.Entities.Product;
 using Microsoft.Data.SqlClient;
 using System.Text;
 using System.Transactions;

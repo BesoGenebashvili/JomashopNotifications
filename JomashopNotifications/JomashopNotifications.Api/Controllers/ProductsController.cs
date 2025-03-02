@@ -1,7 +1,7 @@
 using JomashopNotifications.Application.Product.Commands;
 using JomashopNotifications.Application.Product.Contracts;
 using JomashopNotifications.Application.Product.Queries;
-using JomashopNotifications.Persistence.Entities;
+using JomashopNotifications.Persistence.Entities.Product;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

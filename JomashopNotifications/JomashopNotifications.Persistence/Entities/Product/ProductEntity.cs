@@ -1,4 +1,4 @@
-﻿namespace JomashopNotifications.Persistence.Entities;
+﻿namespace JomashopNotifications.Persistence.Entities.Product;
 
 public enum ProductStatus : byte
 {
