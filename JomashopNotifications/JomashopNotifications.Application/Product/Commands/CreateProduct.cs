@@ -3,10 +3,11 @@ using System.Text.Json.Serialization;
 using JomashopNotifications.Domain;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Entities;
-using Product = JomashopNotifications.Domain.Models.Product;
 using Microsoft.Extensions.Logging;
 
 namespace JomashopNotifications.Application.Product.Commands;
+
+using Product = Domain.Models.Product;
 
 public sealed record CreateProductCommand : IRequest<int>
 {
@@ -39,9 +40,9 @@ public sealed class CreateProductCommandHandler(
             {
                 var (brand, name, images) = enriched switch
                 {
-                    Domain.Models.Product.Enriched.Success(_, var b, var n, var i) => (b, n, i),
-                    Domain.Models.Product.Enriched.ParseError(_, var error) => throw new Exception($"Error while parsing product data: {error}"),
-                    _ => throw new NotImplementedException(nameof(Domain.Models.Product)),
+                    Product.Enriched.Success(_, var b, var n, var i) => (b, n, i),
+                    Product.Enriched.ParseError(_, var error) => throw new Exception($"Error while parsing product data: {error}"),
+                    _ => throw new NotImplementedException(nameof(Product)),
                 };
 
                 var downloadImages = images.Select(i => DownloadImageBytesAsync(i.ImageLink));
@@ -82,7 +83,7 @@ public sealed class CreateProductCommandHandler(
         catch (Exception ex)
         {
             logger.LogInformation(ex, "Error while downloading image from {Link}", link);
-            // Log error in Error database?
+            // Log error in Error database? Custom exception?
             throw;
         }
     }

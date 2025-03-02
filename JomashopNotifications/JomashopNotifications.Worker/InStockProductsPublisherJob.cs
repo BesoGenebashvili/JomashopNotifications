@@ -53,13 +53,14 @@ public sealed class InStockProductsPublisherJob(
             ip => ip.ProductId,
             (p, ip) => new ProductInStockEvent
             {
-                InStockProductId = ip.Id,
                 ProductId = p.Id,
+                InStockProductId = ip.Id,
+                Brand = p.Brand,
+                Name = p.Name,
                 Link = p.Link,
                 Price = ip.Price,
-                CreatedAt = p.CreatedAt,
-                UpdatedAt = p.UpdatedAt,
-                CheckedAt = ip.CheckedAt
+                CheckedAt = ip.CheckedAt,
+                ProductImages = p.ProductImages
             });
 
         logger.LogInformation(

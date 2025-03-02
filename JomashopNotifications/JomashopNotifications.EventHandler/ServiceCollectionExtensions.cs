@@ -3,6 +3,7 @@ using JomashopNotifications.EventHandler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using JomashopNotifications.Application.Common;
+using JomashopNotifications.EventHandler.WindowsToastNotifications;
 
 namespace JomashopNotifications.EventHandler;
 
