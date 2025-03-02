@@ -20,8 +20,8 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
                                   .ImageData;
 
         ShowToastNotification(
-            message.Brand, 
-            message.Name, 
+            message.Brand,
+            message.Name,
             primaryImage,
             context.Message.Price,
             context.Message.CheckedAt);
@@ -32,25 +32,26 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
         return Task.CompletedTask;
     }
 
-    public static void ShowToastNotification(
+    public static async void ShowToastNotification(
         string brand,
         string name,
         byte[]? primaryImage,
         MoneyDto price,
         DateTime checkedAt)
     {
-        const string DefaultImagePath = @"WindowsToastNotifications\Images\default-watch.png";
+        var imageFolderPath = Path.Combine(
+            Environment.CurrentDirectory,
+            "WindowsToastNotifications",
+            "Images");
 
-        var inlineImageUri = 
-            new Uri(
-                primaryImage is not null
-                    ? ConvertImageToUri(primaryImage)
-                    : Path.Combine(Environment.CurrentDirectory, DefaultImagePath));
+        var imagePath = primaryImage is null
+                      ? Path.Combine(imageFolderPath, "default-watch.png")
+                      : WriteImageAndGetPath();
 
         var toastNotification =
             new ToastContentBuilder()
                 .AddText($"{brand} {name} is in stock for {price.Amount}{price.Currency.AsSymbol()} !")
-                .AddInlineImage(inlineImageUri)
+                .AddInlineImage(new Uri(imagePath))
                 .AddAttributionText($"Checked at {checkedAt:M, HH:dd:ss}")
                 .AddButton(new ToastButtonDismiss())
                 .SetToastDuration(ToastDuration.Long)
@@ -58,7 +59,20 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
 
         toastNotification.Show();
 
-        static string ConvertImageToUri(byte[] imageData) =>
-            $"data:image/jpeg;base64,{Convert.ToBase64String(imageData)}";
+        if (!imagePath.Contains("default-watch.png"))
+        {
+            // Temporary image should be deleted after a few seconds to prevent unnecessary file accumulation
+            await Task.Delay(5000);
+            File.Delete(imagePath);
+        }
+
+        string WriteImageAndGetPath()
+        {
+            var temporaryPath = Path.Combine(imageFolderPath, $"{Guid.NewGuid()}.jpg");
+
+            File.WriteAllBytes(temporaryPath, primaryImage);
+
+            return temporaryPath;
+        }
     }
 }

@@ -97,6 +97,8 @@ public sealed class JomashopDataSyncJob(
 
         async Task UpsertSuccessfullyCheckedProducts()
         {
+            List<int> successfullyUpserted = [];
+
             foreach (var product in successfullyCheckedProducts)
             {
                 var command = ResolveUpsertCommand(product);
@@ -104,7 +106,7 @@ public sealed class JomashopDataSyncJob(
                 try
                 {
                     await mediator.Send(command);
-                    logger.LogInformation("Successfully upserted product {ProductId}", product.Reference.Id);
+                    successfullyUpserted.Add(product.Reference.Id);
                 }
                 catch (Exception ex)
                 {
@@ -115,6 +117,13 @@ public sealed class JomashopDataSyncJob(
 
                     await applicationErrorsDatabase.LogAsync(ex);
                 }
+            }
+
+            if (successfullyUpserted.Count is not 0)
+            {
+                logger.LogInformation(
+                    "Successfully upserted products: {ProductIds}",
+                    successfullyUpserted);
             }
 
             static IRequest<int> ResolveUpsertCommand(Product.Checked @checked) =>

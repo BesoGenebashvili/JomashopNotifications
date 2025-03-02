@@ -24,27 +24,28 @@ public sealed class InStockProductsPublisherJob(
     {
         var inStockProducts = await mediator.Send(new ListInStockProductsQuery());
 
-        if (inStockProducts.Count == 0)
+        if (inStockProducts.Count is 0)
         {
             logger.LogInformation("No in stock products were found in the database");
             return;
         }
 
-        var products = await mediator.Send(new ListProductsQuery()
-        {
-            Status = ProductStatus.Active,
-            Ids = inStockProducts.Select(ip => ip.ProductId)
-                                 .ToArray()
-        });
+        var products = await mediator.Send(
+            new ListProductsQuery
+            {
+                Status = ProductStatus.Active,
+                Ids = inStockProducts.Select(ip => ip.ProductId)
+                                     .ToArray()
+            });
 
-        if (products.Count == 0)
+        if (products.Count is 0)
         {
             logger.LogInformation("No active in stock products were found in the database");
             return;
         }
 
         logger.LogInformation(
-            "Found {Count} active in stock products in the database. ProductIds: {ProductIds}",
+            "Found {Count} active in stock products in the database: {ProductIds}",
             inStockProducts.Count,
             inStockProducts.Select(x => x.ProductId));
 
@@ -65,21 +66,35 @@ public sealed class InStockProductsPublisherJob(
             });
 
         logger.LogInformation(
-            "Publishing {Count} product in stock events for ProductIds: {ProductIds}",
+            "Publishing {Count} 'ProductInStockEvent' events for products: {ProductIds}",
             productInStockEvents.Count(),
             productInStockEvents.Select(e => e.ProductId));
+
+        List<int> successfullyPublished = [];
 
         foreach (var @event in productInStockEvents)
         {
             try
             {
                 await bus.Publish(@event);
+                successfullyPublished.Add(@event.ProductId);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to publish product in stock event for ProductId: {ProductId}", @event.ProductId);
+                logger.LogError(
+                    "An error occurred while publishing 'ProductInStockEvent' for: {ProductId}. Error: {ex}",
+                    @event.ProductId,
+                    ex);
+
                 await applicationErrorsDatabase.LogAsync(ex);
             }
+        }
+
+        if (successfullyPublished.Count is not 0)
+        {
+            logger.LogInformation(
+                "Successfully published 'ProductInStockEvent' events for products: {ProductIds}",
+                successfullyPublished);
         }
 
         // Check for price if > than threshold -> send notification - I need separate configuration table for this
