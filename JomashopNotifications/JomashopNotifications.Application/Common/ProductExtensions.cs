@@ -1,7 +1,7 @@
 ﻿using JomashopNotifications.Application.InStockProduct.Contracts;
 using JomashopNotifications.Application.Product.Contracts;
+using JomashopNotifications.Domain.Models;
 using JomashopNotifications.Persistence.Entities.Product;
-using System.Collections.ObjectModel;
 
 namespace JomashopNotifications.Application.Common;
 
@@ -25,6 +25,7 @@ public static class ProductExtensions
     public static InStockProductDto ToDto(this InStockProductEntity self) =>
         new(self.Id,
             self.ProductId,
-            self.Price,
+            new(self.Price, 
+                Enum.Parse<Currency>(self.Currency)),
             self.CheckedAt.ToLocalTime());
 }

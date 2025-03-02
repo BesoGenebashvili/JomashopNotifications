@@ -9,6 +9,7 @@ public sealed record Money(decimal Value, Currency Currency)
             ? result!
             : throw new FormatException($"Can't resolve Money from: {value}");
 
+    // This logic shouldn't be here
     public static bool TryParse(string value, out Money? result)
     {
         result = value.Trim() switch

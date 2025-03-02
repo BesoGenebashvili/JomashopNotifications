@@ -3,6 +3,7 @@ using JomashopNotifications.Application.Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Uwp.Notifications;
 using JomashopNotifications.Domain.Models;
+using JomashopNotifications.Application.InStockProduct.Contracts;
 
 namespace JomashopNotifications.EventHandler.WindowsToastNotifications;
 
@@ -23,7 +24,6 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
             message.Name, 
             primaryImage,
             context.Message.Price,
-            Currency.USD,// Param
             context.Message.CheckedAt);
 
 
@@ -37,10 +37,7 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
         string brand,
         string name,
         byte[]? primaryImage,
-
-        // I need AmountDto.
-        decimal amount,
-        Currency currency,
+        MoneyDto price,
         DateTime checkedAt)
     {
         const string DefaultImagePath = @"WindowsToastNotifications\Images\default-watch.png";
@@ -52,8 +49,8 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
                     : Path.Combine(Environment.CurrentDirectory, DefaultImagePath));
 
         var toastNotification =
-            new ToastContentBuilder()//                           
-                .AddText($"{brand} {name} is in stock for {amount}{currency.AsSymbol()} !")
+            new ToastContentBuilder()
+                .AddText($"{brand} {name} is in stock for {price.Amount}{price.Currency.AsSymbol()} !")
                 .AddInlineImage(inlineImageUri)
                 .AddAttributionText($"Checked at {checkedAt:M, HH:dd:ss}")
                 .AddButton(new ToastButtonDismiss())

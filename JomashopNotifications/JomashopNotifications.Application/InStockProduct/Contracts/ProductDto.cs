@@ -3,5 +3,5 @@
 public sealed record InStockProductDto(
     int Id,
     int ProductId,
-    decimal Price,
+    MoneyDto Price,
     DateTime CheckedAt);
