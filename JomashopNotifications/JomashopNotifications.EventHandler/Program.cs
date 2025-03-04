@@ -4,10 +4,12 @@ using JomashopNotifications.Application;
 using JomashopNotifications.EventHandler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using JomashopNotifications.EventHandler.WindowsToastNotifications;
 
 Console.WriteLine("Hello, World!");
 
 var host = CreateHostBuilder(args).Build();
+
 await host.RunAsync();
 
 static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -24,6 +26,8 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
         .ConfigureServices((hostContext, services) =>
         {
             var configuration = hostContext.Configuration;
+
+            WindowsToastNotification.RegisterEventSubscribers();
 
             services.AddMassTransit(configuration)
                     .AddApplicationServices();

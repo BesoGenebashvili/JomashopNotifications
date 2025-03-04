@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
         return services.AddMassTransit(busRegConfig =>
         {
             busRegConfig.SetKebabCaseEndpointNameFormatter();
-            busRegConfig.AddConsumer<WindowsToastNotificationHandler>();
+            busRegConfig.AddConsumer<ProductInStockEventToastNotificationHandler>();
 
             busRegConfig.UsingRabbitMq((context, busConfig) =>
             {

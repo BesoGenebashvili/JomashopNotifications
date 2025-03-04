@@ -7,32 +7,32 @@ using JomashopNotifications.Application.InStockProduct.Contracts;
 
 namespace JomashopNotifications.EventHandler.WindowsToastNotifications;
 
-public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotificationHandler> logger) : IConsumer<ProductInStockEvent>
+public sealed class ProductInStockEventToastNotificationHandler(
+    ILogger<ProductInStockEventToastNotificationHandler> logger) : IConsumer<ProductInStockEvent>
 {
-    public Task Consume(ConsumeContext<ProductInStockEvent> context)
+    public async Task Consume(ConsumeContext<ProductInStockEvent> context)
     {
-        // TODO: Update Windows toast notification to handle 'OnActivated' event
-
         var message = context.Message;
+
+        logger.LogInformation("Received product in stock event {@Message}", message);
 
         var primaryImage = message.ProductImages
                                   .FirstOrDefault(i => i.IsPrimary)?
                                   .ImageData;
 
-        ShowToastNotification(
+        await ShowToastNotificationAsync(
+            message.ProductId,
+            message.Link,
             message.Brand,
             message.Name,
             primaryImage,
-            context.Message.Price,
-            context.Message.CheckedAt);
-
-
-        logger.LogInformation("Received product in stock event {@Message}", context.Message);
-
-        return Task.CompletedTask;
+            message.Price,
+            message.CheckedAt);
     }
 
-    public static async void ShowToastNotification(
+    public static async Task ShowToastNotificationAsync(
+        int productId,
+        string link,
         string brand,
         string name,
         byte[]? primaryImage,
@@ -46,13 +46,19 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
 
         var imagePath = primaryImage is null
                       ? Path.Combine(imageFolderPath, "default-watch.png")
-                      : WriteImageAndGetPath();
+                      : StoreImageAndGetPath();
 
         var toastNotification =
             new ToastContentBuilder()
+                .AddArgument(WindowsToastKey.ProductId, productId)
                 .AddText($"{brand} {name} is in stock for {price.Amount}{price.Currency.AsSymbol()} !")
                 .AddInlineImage(new Uri(imagePath))
-                .AddAttributionText($"Checked at {checkedAt:M, HH:dd:ss}")
+                .AddAttributionText($"Checked at {checkedAt:MMMM M, HH:dd:ss}")
+                .AddButton(new ToastButton()
+                    .SetContent("Open")
+                    .AddArgument(WindowsToastKey.Action, WindowsToastArgument.Open)
+                    .AddArgument(WindowsToastKey.Link, link)
+                    .SetBackgroundActivation())
                 .AddButton(new ToastButtonDismiss())
                 .SetToastDuration(ToastDuration.Long)
                 .SetToastScenario(ToastScenario.Default);
@@ -66,7 +72,7 @@ public sealed class WindowsToastNotificationHandler(ILogger<WindowsToastNotifica
             File.Delete(imagePath);
         }
 
-        string WriteImageAndGetPath()
+        string StoreImageAndGetPath()
         {
             var temporaryPath = Path.Combine(imageFolderPath, $"{Guid.NewGuid()}.jpg");
 
