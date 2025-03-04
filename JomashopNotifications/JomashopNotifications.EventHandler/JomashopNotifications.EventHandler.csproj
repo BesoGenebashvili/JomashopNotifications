@@ -5,7 +5,12 @@
 		<TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<ApplicationIcon>app icon.ico</ApplicationIcon>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="app icon.ico" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="MassTransit.RabbitMQ" Version="8.3.6" />
