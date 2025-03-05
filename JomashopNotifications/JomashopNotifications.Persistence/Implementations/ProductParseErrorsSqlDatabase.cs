@@ -5,11 +5,11 @@ using Microsoft.Data.SqlClient;
 
 namespace JomashopNotifications.Persistence.Implementations;
 
-public sealed class ProductParseErrorsSqlDatabase(string ConnectionString) : IProductParseErrorsDatabase
+public sealed class ProductParseErrorsSqlDatabase(string connectionString) : IProductParseErrorsDatabase
 {
     public async Task<int> UpsertAsync(int productId, string message, DateTime checkedAt)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var @params = new DynamicParameters(new
         {
@@ -47,7 +47,7 @@ public sealed class ProductParseErrorsSqlDatabase(string ConnectionString) : IPr
 
     public Task<bool> DeleteAsync(int id) =>
         SqlDatabaseExtensions.DeleteFromTableAsync(
-            ConnectionString, 
+            connectionString, 
             DatabaseTable.ProductParseErrors, 
             id);
 }

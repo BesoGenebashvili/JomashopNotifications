@@ -6,11 +6,11 @@ using Microsoft.Data.SqlClient;
 
 namespace JomashopNotifications.Persistence.Implementations;
 
-public sealed class ProductProfilesSqlDatabase(string ConnectionString) : IProductProfilesDatabase
+public sealed class ProductProfilesSqlDatabase(string connectionString) : IProductProfilesDatabase
 {
     public async Task<IEnumerable<ProductProfileEntity>> ListAsync(int[]? productIds)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var @params = new
         {
@@ -27,7 +27,7 @@ public sealed class ProductProfilesSqlDatabase(string ConnectionString) : IProdu
 
     public async Task<int> UpsertAsync(int productId, decimal priceThreshold)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var @params = new DynamicParameters(new
         {
@@ -61,35 +61,45 @@ public sealed class ProductProfilesSqlDatabase(string ConnectionString) : IProdu
         return @params.Get<int>("@id");
     }
 
-    private async Task<bool> SetIsActiveAsync(int id, bool isActive)
+    private async Task<bool> SetIsActiveAsync(int productId, bool isActive)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var @params = new
         {
-            id,
+            productId,
             isActive,
         };
 
         var sql = $"""
                    UPDATE dbo.{DatabaseTable.ProductProfiles} SET
                      IsActive = @isActive
-                   WHERE Id = @id AND IsActive <> @isActive
+                   WHERE ProductId = @productId AND IsActive <> @isActive
                    """;
 
         return await connection.ExecuteAsync(sql, @params) > 0;
     }
 
-    public Task<bool> ActivateAsync(int id) =>
-        SetIsActiveAsync(id, true);
+    public Task<bool> ActivateAsync(int productId) =>
+        SetIsActiveAsync(productId, true);
 
-    public Task<bool> DeactivateAsync(int id) =>
-        SetIsActiveAsync(id, false);
+    public Task<bool> DeactivateAsync(int productId) =>
+        SetIsActiveAsync(productId, false);
 
-    public Task<bool> DeleteAsync(int id) =>
-        SqlDatabaseExtensions.DeleteFromTableAsync(
-            ConnectionString,
-            DatabaseTable.ProductProfiles,
-            id);
+    public async Task<bool> DeleteAsync(int productId)
+    {
+        var connection = new SqlConnection(connectionString);
 
+        var @params = new
+        {
+            productId
+        };
+
+        var sql = $"""
+                   DELETE FROM dbo.{DatabaseTable.ProductProfiles}
+                   WHERE ProductId = @productId;
+                   """;
+
+        return await connection.ExecuteAsync(sql, @params) > 0;
+    }
 }

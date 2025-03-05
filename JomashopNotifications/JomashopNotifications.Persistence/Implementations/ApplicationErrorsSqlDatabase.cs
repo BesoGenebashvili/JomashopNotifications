@@ -5,11 +5,11 @@ using Microsoft.Data.SqlClient;
 
 namespace JomashopNotifications.Persistence.Implementations;
 
-public sealed class ApplicationErrorsSqlDatabase(string ConnectionString) : IApplicationErrorsDatabase
+public sealed class ApplicationErrorsSqlDatabase(string connectionString) : IApplicationErrorsDatabase
 {
     public Task InsertAsync(string message, string? type)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         type = type.NullIfWhiteSpace();
 

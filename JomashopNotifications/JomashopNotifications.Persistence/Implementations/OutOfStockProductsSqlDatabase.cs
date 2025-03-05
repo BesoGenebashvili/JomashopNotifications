@@ -5,11 +5,11 @@ using Microsoft.Data.SqlClient;
 
 namespace JomashopNotifications.Persistence.Implementations;
 
-public sealed class OutOfStockProductsSqlDatabase(string ConnectionString) : IOutOfStockProductsDatabase
+public sealed class OutOfStockProductsSqlDatabase(string connectionString) : IOutOfStockProductsDatabase
 {
     public async Task<int> UpsertAsync(int productId, DateTime checkedAt)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var @params = new DynamicParameters(new
         {
@@ -45,7 +45,7 @@ public sealed class OutOfStockProductsSqlDatabase(string ConnectionString) : IOu
 
     public Task<bool> DeleteAsync(int id) =>
         SqlDatabaseExtensions.DeleteFromTableAsync(
-            ConnectionString,
+            connectionString,
             DatabaseTable.OutOfStockProducts,
             id);
 }

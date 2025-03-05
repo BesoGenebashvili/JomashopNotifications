@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IOutOfStockProductsDatabase>(_ => new OutOfStockProductsSqlDatabase(connectionString));
         services.AddSingleton<IProductParseErrorsDatabase>(_ => new ProductParseErrorsSqlDatabase(connectionString));
         services.AddSingleton<IApplicationErrorsDatabase>(_ => new ApplicationErrorsSqlDatabase(connectionString));
+        services.AddSingleton<IProductProfilesDatabase>(_ => new ProductProfilesSqlDatabase(connectionString));
 
         return services;
     }

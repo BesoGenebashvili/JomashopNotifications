@@ -7,11 +7,11 @@ using Microsoft.Data.SqlClient;
 
 namespace JomashopNotifications.Persistence.Implementations;
 
-public sealed class InStockProductsSqlDatabase(string ConnectionString) : IInStockProductsDatabase
+public sealed class InStockProductsSqlDatabase(string connectionString) : IInStockProductsDatabase
 {
     public async Task<IEnumerable<InStockProductEntity>> ListAsync()
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var sql = $"SELECT * FROM dbo.{DatabaseTable.InStockProducts} WITH(NOLOCK)";
 
@@ -20,7 +20,7 @@ public sealed class InStockProductsSqlDatabase(string ConnectionString) : IInSto
 
     public async Task<int> UpsertAsync(UpsertInStockProductEntity productEntity)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var @params = new DynamicParameters(new
         {
@@ -60,7 +60,7 @@ public sealed class InStockProductsSqlDatabase(string ConnectionString) : IInSto
 
     public Task<bool> DeleteAsync(int id) =>
         SqlDatabaseExtensions.DeleteFromTableAsync(
-            ConnectionString,
+            connectionString,
             DatabaseTable.InStockProducts,
             id);
 }

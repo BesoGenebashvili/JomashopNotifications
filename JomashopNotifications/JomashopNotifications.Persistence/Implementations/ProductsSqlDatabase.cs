@@ -10,7 +10,7 @@ using System.Transactions;
 namespace JomashopNotifications.Persistence.Implementations;
 
 // Awaiting the function calls to ensure SqlConnection is properly used before disposal
-public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsDatabase
+public sealed class ProductsSqlDatabase(string connectionString) : IProductsDatabase
 {
     public async Task<ProductEntity?> GetAsync(int id) =>
         (await ListAsync([id], null))
@@ -19,7 +19,7 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
     // Flags ? (includeImages)
     public async Task<IEnumerable<ProductEntity>> ListAsync(int[]? ids, ProductStatus? status)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var @params = new DynamicParameters();
 
@@ -82,7 +82,7 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
 
     public async Task<int> InsertAsync(InsertProductEntity insertProductModel)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
         using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
         var productId = await InsertProduct();
@@ -143,7 +143,7 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
 
     private async Task<bool> SetStatusAsync(int id, ProductStatus status)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var @params = new
         {
@@ -170,7 +170,7 @@ public sealed class ProductsSqlDatabase(string ConnectionString) : IProductsData
 
     public Task<bool> DeleteAsync(int id) =>
         SqlDatabaseExtensions.DeleteFromTableAsync(
-            ConnectionString,
+            connectionString,
             DatabaseTable.Products,
             id);
 }
