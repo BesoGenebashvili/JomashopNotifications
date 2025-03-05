@@ -7,7 +7,7 @@ public interface IProductsDatabase
     Task<ProductEntity?> GetAsync(int id);
     Task<IEnumerable<ProductEntity>> ListAsync(int[]? ids, ProductStatus? status);
     Task<int> InsertAsync(InsertProductEntity insertProductModel);
-    Task<bool> SetStatusAsActiveAsync(int id);
-    Task<bool> SetStatusAsInactiveAsync(int id);
+    Task<bool> ActivateAsync(int id);
+    Task<bool> DeactivateAsync(int id);
     Task<bool> DeleteAsync(int id);
 }

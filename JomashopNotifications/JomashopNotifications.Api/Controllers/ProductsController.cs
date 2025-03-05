@@ -39,14 +39,14 @@ public sealed class ProductsController(IMediator mediator) : ControllerBase
     [HttpPut("activate/{id:int}")]
     public async Task<ActionResult> SetStatusAsActiveAsync(int id)
     {
-        await mediator.Send(new SetStatusAsActiveCommand(id));
+        await mediator.Send(new ActivateProductCommand(id));
         return Ok();
     }
 
     [HttpPut("deactivate/{id:int}")]
     public async Task<ActionResult> SetStatusAsInactiveAsync(int id)
     {
-        await mediator.Send(new SetStatusAsInactiveCommand(id));
+        await mediator.Send(new DeactivateProductCommand(id));
         return Ok();
     }
 

@@ -162,10 +162,10 @@ public sealed class ProductsSqlDatabase(string connectionString) : IProductsData
         return await connection.ExecuteAsync(sql, @params) > 0;
     }
 
-    public Task<bool> SetStatusAsActiveAsync(int id) =>
+    public Task<bool> ActivateAsync(int id) =>
         SetStatusAsync(id, ProductStatus.Active);
 
-    public Task<bool> SetStatusAsInactiveAsync(int id) =>
+    public Task<bool> DeactivateAsync(int id) =>
         SetStatusAsync(id, ProductStatus.Inactive);
 
     public Task<bool> DeleteAsync(int id) =>
