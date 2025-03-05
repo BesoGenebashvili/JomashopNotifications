@@ -5,12 +5,12 @@ namespace JomashopNotifications.Application.ProductProfile.Commands;
 
 public sealed record UpsertProductProfileCommand(
     int ProductId,
-    decimal PriceThreshold) : IRequest<int>;
+    decimal PriceThreshold) : IRequest;
 
 public sealed class UpsertProductProfileCommandCommandHandler(IProductProfilesDatabase productProfilesDatabase)
-    : IRequestHandler<UpsertProductProfileCommand, int>
+    : IRequestHandler<UpsertProductProfileCommand>
 {
-    public async Task<int> Handle(
+    public async Task Handle(
         UpsertProductProfileCommand request,
         CancellationToken cancellationToken) =>
         await productProfilesDatabase.UpsertAsync(

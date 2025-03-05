@@ -25,20 +25,15 @@ public sealed class ProductProfilesSqlDatabase(string connectionString) : IProdu
         return await connection.QueryAsync<ProductProfileEntity>(sql.ToString(), @params);
     }
 
-    public async Task<int> UpsertAsync(int productId, decimal priceThreshold)
+    public async Task UpsertAsync(int productId, decimal priceThreshold)
     {
         using var connection = new SqlConnection(connectionString);
 
-        var @params = new DynamicParameters(new
+        var @params = new
         {
             productId,
             priceThreshold
-        });
-
-        @params.Add(
-            "@id",
-            dbType: System.Data.DbType.Int32,
-            direction: System.Data.ParameterDirection.Output);
+        };
 
         var sql = $"""
                    IF EXISTS (SELECT 1 FROM dbo.{DatabaseTable.ProductProfiles} WHERE ProductId = @productId)
@@ -46,19 +41,15 @@ public sealed class ProductProfilesSqlDatabase(string connectionString) : IProdu
                            UPDATE dbo.{DatabaseTable.ProductProfiles} SET
                                PriceThreshold = @priceThreshold
                            WHERE ProductId = @productId;
-                           SET @id = (SELECT Id FROM dbo.{DatabaseTable.ProductProfiles} WHERE ProductId = @productId);
                        END
                    ELSE
                        BEGIN
                            INSERT INTO dbo.{DatabaseTable.ProductProfiles} (ProductId, PriceThreshold)
                            VALUES (@productId, @priceThreshold);
-                           SET @id = SCOPE_IDENTITY();
                        END
                    """;
 
         await connection.ExecuteAsync(sql, @params);
-
-        return @params.Get<int>("@id");
     }
 
     private async Task<bool> SetIsActiveAsync(int productId, bool isActive)
