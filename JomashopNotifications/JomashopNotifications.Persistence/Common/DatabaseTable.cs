@@ -8,4 +8,5 @@ public static class DatabaseTable
     public const string OutOfStockProducts = "OutOfStockProducts";
     public const string ProductParseErrors = "ProductParseErrors";
     public const string ApplicationErrors = "ApplicationErrors";
+    public const string ProductProfiles = "ProductProfiles";
 }

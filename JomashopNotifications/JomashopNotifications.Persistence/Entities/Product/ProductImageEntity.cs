@@ -2,6 +2,6 @@
 
 public sealed record ProductImageEntity
 {
-    public bool IsPrimary { get; set; }
-    public required byte[] ImageData { get; set; }
+    public required bool IsPrimary { get; init; }
+    public required byte[] ImageData { get; init; }
 }

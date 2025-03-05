@@ -97,8 +97,10 @@ public sealed class InStockProductsPublisherJob(
                 successfullyPublished);
         }
 
+        // ProductProfiles?
+
         // Check for price if > than threshold -> send notification - I need separate configuration table for this
-        // I need separate notification handlers like EmailNotificationHandler, SmsNotificationHandler, DesktipMessageNotificationHandler
+        // I need separate notification handlers like EmailNotificationHandler, SmsNotificationHandler, DesktopMessageNotificationHandler
         // WindowsToastNotificationHandler
         // Error Queue
     }

@@ -2,9 +2,9 @@
 
 public sealed class InStockProductEntity
 {
-    public int Id { get; set; }
-    public int ProductId { get; init; }
-    public decimal Price { get; init; }
-    public string Currency { get; init; } = default!;
-    public DateTime CheckedAt { get; init; }
+    public required int Id { get; init; }
+    public required int ProductId { get; init; }
+    public required decimal Price { get; init; }
+    public required string Currency { get; init; } = default!;
+    public required DateTime CheckedAt { get; init; }
 }

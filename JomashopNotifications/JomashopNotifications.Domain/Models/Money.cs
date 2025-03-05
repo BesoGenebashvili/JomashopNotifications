@@ -2,6 +2,7 @@
 
 namespace JomashopNotifications.Domain.Models;
 
+// Add rounding.
 public sealed record Money(decimal Value, Currency Currency)
 {
     public static Money Parse(string value) =>

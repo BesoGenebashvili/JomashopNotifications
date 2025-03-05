@@ -68,6 +68,7 @@ public sealed class ProductInStockEventToastNotificationHandler(
         if (!imagePath.Contains("default-watch.png"))
         {
             // Temporary image should be deleted after a few seconds to prevent unnecessary file accumulation
+            // Unfortunately I can't pass binary data as a URI to AddInlineImage
             await Task.Delay(5000);
             File.Delete(imagePath);
         }
