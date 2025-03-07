@@ -37,8 +37,8 @@ public static class ServiceCollectionExtensions
             var triggerName = $"{nameof(JomashopDataSyncJob)}-Trigger";
 
             configurator.AddTrigger(o => o.ForJob(JomashopDataSyncJob.key)
-                                          .WithIdentity(triggerName) // Temporary, should be: WithIntervalInMinutes
-                                          .WithSimpleSchedule(b => b.WithIntervalInSeconds(workerOptions.JomashopDataSyncJobOptions.RunEveryMinutes)
+                                          .WithIdentity(triggerName)
+                                          .WithSimpleSchedule(b => b.WithIntervalInMinutes(workerOptions.JomashopDataSyncJobOptions.RunEveryMinutes)
                                                                     .RepeatForever()));
         }
 
@@ -51,7 +51,7 @@ public static class ServiceCollectionExtensions
 
             configurator.AddTrigger(o => o.ForJob(InStockProductsPublisherJob.key)
                                           .WithIdentity(triggerName)
-                                          .WithSimpleSchedule(b => b.WithIntervalInSeconds(workerOptions.InStockProductsPublisherJobOptions.RunEveryMinutes)
+                                          .WithSimpleSchedule(b => b.WithIntervalInMinutes(workerOptions.InStockProductsPublisherJobOptions.RunEveryMinutes)
                                                                     .RepeatForever()));
         }
     }

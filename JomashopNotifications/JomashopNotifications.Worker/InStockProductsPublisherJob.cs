@@ -75,6 +75,14 @@ public sealed class InStockProductsPublisherJob(
         var productInStockEventsToPublish = productInStockEvents.Where(
                 p => MeetsProfileRequirements(p.ProductId, p.Price.Amount));
 
+        var productInStockEventsToSkip = productInStockEvents.Except(productInStockEventsToPublish);
+
+        if (productInStockEventsToSkip.Any())
+            logger.LogInformation(
+                "Skipping {Count} 'ProductInStockEvent' events for products: {ProductIds}",
+                productInStockEventsToSkip.Count(),
+                productInStockEventsToSkip.Select(x => x.ProductId));
+
         logger.LogInformation(
             "Publishing {Count} 'ProductInStockEvent' events for products: {ProductIds}",
             productInStockEventsToPublish.Count(),
