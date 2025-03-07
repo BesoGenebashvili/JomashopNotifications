@@ -7,6 +7,7 @@ using JomashopNotifications.Application.InStockProduct.Queries;
 using JomashopNotifications.Persistence.Abstractions;
 using Microsoft.Extensions.Logging;
 using JomashopNotifications.Persistence.Entities.Product;
+using JomashopNotifications.Application.ProductProfile.Queries;
 
 namespace JomashopNotifications.Worker;
 
@@ -44,10 +45,11 @@ public sealed class InStockProductsPublisherJob(
             return;
         }
 
-        logger.LogInformation(
-            "Found {Count} active in stock products in the database: {ProductIds}",
-            inStockProducts.Count,
-            inStockProducts.Select(x => x.ProductId));
+        var productProfiles = await mediator.Send(
+            new ListProductProfilesQuery
+            {
+                ProductIds = products.Select(p => p.Id).ToArray()
+            });
 
         var productInStockEvents = products.Join(
             inStockProducts,
@@ -66,13 +68,21 @@ public sealed class InStockProductsPublisherJob(
             });
 
         logger.LogInformation(
+            "Found {Count} active in stock products in the database: {ProductIds}",
+            inStockProducts.Count,
+            inStockProducts.Select(x => x.ProductId));
+
+        var productInStockEventsToPublish = productInStockEvents.Where(
+                p => MeetsProfileRequirements(p.ProductId, p.Price.Amount));
+
+        logger.LogInformation(
             "Publishing {Count} 'ProductInStockEvent' events for products: {ProductIds}",
-            productInStockEvents.Count(),
-            productInStockEvents.Select(e => e.ProductId));
+            productInStockEventsToPublish.Count(),
+            productInStockEventsToPublish.Select(e => e.ProductId));
 
         List<int> successfullyPublished = [];
 
-        foreach (var @event in productInStockEvents)
+        foreach (var @event in productInStockEventsToPublish)
         {
             try
             {
@@ -97,11 +107,17 @@ public sealed class InStockProductsPublisherJob(
                 successfullyPublished);
         }
 
-        // ProductProfiles?
+        bool MeetsProfileRequirements(int productId, decimal price)
+        {
+            var profile = productProfiles.FirstOrDefault(p => p.ProductId == productId);
 
-        // Check for price if > than threshold -> send notification - I need separate configuration table for this
-        // I need separate notification handlers like EmailNotificationHandler, SmsNotificationHandler, DesktopMessageNotificationHandler
-        // WindowsToastNotificationHandler
-        // Error Queue
+            return profile switch
+            {
+                { IsActive: true, PriceThreshold: var priceThreshold } => price <= profile.PriceThreshold,
+                _ => true,
+            };
+        }
+
+        // Error Queue ?
     }
 }

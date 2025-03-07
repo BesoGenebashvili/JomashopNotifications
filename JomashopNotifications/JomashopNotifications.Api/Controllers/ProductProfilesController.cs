@@ -18,7 +18,7 @@ public sealed class ProductProfilesController(IMediator mediator) : ControllerBa
                 ProductIds = productIds
             });
 
-    [HttpPost]
+    [HttpPost("upsert")]
     public async Task<ActionResult> UpsertAsync([FromBody] UpsertProductProfileCommand command)
     {
         await mediator.Send(command);
