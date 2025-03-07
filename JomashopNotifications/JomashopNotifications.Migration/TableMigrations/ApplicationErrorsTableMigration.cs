@@ -3,7 +3,7 @@ using JomashopNotifications.Persistence.Common;
 
 namespace JomashopNotifications.Migration.TableMigrations;
 
-[Migration(6)]
+[Migration(2025_02_07_01_00)]
 public class ApplicationErrorsTableMigration : FluentMigrator.Migration
 {
     public override void Up() =>

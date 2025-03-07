@@ -4,7 +4,7 @@ using System.Data;
 
 namespace JomashopNotifications.Migration.TableMigrations;
 
-[Migration(7)]
+[Migration(2025_02_08_01_00)]
 public class ProductImagesTableMigration : FluentMigrator.Migration
 {
     public override void Up() =>

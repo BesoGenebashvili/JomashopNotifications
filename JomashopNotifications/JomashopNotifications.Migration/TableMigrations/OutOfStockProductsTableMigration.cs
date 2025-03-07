@@ -4,7 +4,7 @@ using JomashopNotifications.Persistence.Common;
 
 namespace JomashopNotifications.Migration.TableMigrations;
 
-[Migration(4)]
+[Migration(2025_02_08_02_00)]
 public sealed class OutOfStockProductsTableMigration : FluentMigrator.Migration
 {
     public override void Up() =>

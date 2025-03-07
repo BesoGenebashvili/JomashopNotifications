@@ -4,7 +4,7 @@ using JomashopNotifications.Persistence.Common;
 namespace JomashopNotifications.Migration.TableMigrations;
 
 // Currency?
-[Migration(9)]
+[Migration(2025_03_05_00_00)]
 public sealed class ProductProfilesTableMigration : FluentMigrator.Migration
 {
     public override void Up() =>

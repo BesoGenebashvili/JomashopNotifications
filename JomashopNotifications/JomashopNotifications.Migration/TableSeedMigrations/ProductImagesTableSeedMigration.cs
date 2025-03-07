@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace JomashopNotifications.Migration.TableSeedMigrations;
 
-[Migration(8)]
+[Migration(2025_02_25_00_00)]
 public class ProductImagesTableSeedMigration : FluentMigrator.Migration
 {
     private static readonly string imageFolderPath =

@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace JomashopNotifications.Migration.TableSeedMigrations;
 
-[Migration(2)]
+[Migration(2025_02_07_02_00)]
 public class ProductsTableSeedMigration : FluentMigrator.Migration
 {
     private readonly ImmutableList<(string brand, string name, string link)> records =

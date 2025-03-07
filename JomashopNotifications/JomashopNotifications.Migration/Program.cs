@@ -3,6 +3,9 @@ using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
 using Microsoft.Extensions.Configuration;
 
+// The migration version format is YYYY_MM_DD_HH_mm
+// example: 2025_03_07_11_40
+
 Console.WriteLine("Hello, World!");
 
 var configuration = CreateConfiguration();
