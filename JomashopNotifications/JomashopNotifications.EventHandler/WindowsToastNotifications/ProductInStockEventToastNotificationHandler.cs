@@ -14,7 +14,7 @@ public sealed class ProductInStockEventToastNotificationHandler(
     {
         var message = context.Message;
 
-        logger.LogInformation("Received product in stock event {@Message}", message);
+        logger.LogInformation("Received 'ProductInStockEvent' for product: {ProductId}, Message: {@Message}", message.ProductId, message);
 
         var primaryImage = message.ProductImages
                                   .FirstOrDefault(i => i.IsPrimary)?

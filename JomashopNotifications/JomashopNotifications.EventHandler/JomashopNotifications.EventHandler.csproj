@@ -38,6 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="EmailNotifications\" />
 	  <Folder Include="WindowsToastNotifications\Images\" />
 	</ItemGroup>
 

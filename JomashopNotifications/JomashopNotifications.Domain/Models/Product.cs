@@ -2,6 +2,7 @@
 
 using HtmlAgilityPack;
 using JomashopNotifications.Domain.Common;
+using System.Diagnostics;
 
 namespace JomashopNotifications.Domain.Models;
 
@@ -14,6 +15,7 @@ public sealed record ProductImage(
     public static ProductImage Secondary(Uri imageLink) => new(false, imageLink);
 }
 
+[DebuggerDisplay("{DebuggerDisplay,nq}")]
 public abstract record Product(Uri Link)
 {
     public sealed record ToEnrich(Uri Link) : Product(Link);
@@ -58,6 +60,8 @@ public abstract record Product(Uri Link)
 
         _ => throw new NotImplementedException(nameof(Product))
     };
+
+    private string DebuggerDisplay => Show();
 }
 
 public static class ProductExtensions
