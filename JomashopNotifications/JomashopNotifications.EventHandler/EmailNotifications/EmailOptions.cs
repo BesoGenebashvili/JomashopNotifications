@@ -2,8 +2,6 @@
 
 public sealed record EmailOptions
 {
-    public const string SectionName = "EmailOptions";
-
     public sealed record SenderEmailOptions
     {
         public required string Email { get; init; }
