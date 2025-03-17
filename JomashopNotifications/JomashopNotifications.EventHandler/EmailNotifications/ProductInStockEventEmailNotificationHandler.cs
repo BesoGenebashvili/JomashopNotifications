@@ -15,8 +15,9 @@ public sealed class ProductInStockEventEmailNotificationHandler(
 
         var subject = $"Jomashop Notification: {productFullName} is now in stock!";
 
-        var primaryImageBase64 = context.Message.GetPrimaryImageBase64();
+        var primaryImageBase64 = context.Message.GetPrimaryImageBase64() ?? await GetDefaultImageAsync();
 
+        // this should be editable.. Make something like template..
         var body = $@"""
                      <p><strong>Great news!</strong> The product you're interested in '{productFullName}' is now available.</p>
                      <p><img src='data:image/jpeg;base64,{primaryImageBase64}' alt='Product Image' width='300' /></p>
@@ -24,5 +25,14 @@ public sealed class ProductInStockEventEmailNotificationHandler(
                      """;
 
         await emailService.SendAsync(subject, body, true);
+
+        static async Task<string> GetDefaultImageAsync() =>
+            Convert.ToBase64String(
+                await File.ReadAllBytesAsync(
+                    Path.Combine(
+                        Environment.CurrentDirectory,
+                        "Common",
+                        "Images",
+                        "default-watch.png")));
     }
 }

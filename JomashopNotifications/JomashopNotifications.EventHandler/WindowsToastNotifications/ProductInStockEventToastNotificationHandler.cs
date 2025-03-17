@@ -40,7 +40,7 @@ public sealed class ProductInStockEventToastNotificationHandler(
     {
         var imageFolderPath = Path.Combine(
             Environment.CurrentDirectory,
-            "WindowsToastNotifications",
+            "Common",
             "Images");
 
         var imagePath = primaryImage is null

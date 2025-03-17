@@ -30,6 +30,5 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
             WindowsToastNotification.RegisterEventSubscribers();
 
             services.AddMassTransit(configuration)
-                    .AddEmailService(configuration)
                     .AddApplicationServices();
         });
