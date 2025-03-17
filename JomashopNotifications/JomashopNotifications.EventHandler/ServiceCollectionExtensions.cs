@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using JomashopNotifications.Application.Common;
 using JomashopNotifications.EventHandler.WindowsToastNotifications;
+using JomashopNotifications.EventHandler.EmailNotifications;
 
 namespace JomashopNotifications.EventHandler;
 
@@ -16,7 +17,9 @@ public static class ServiceCollectionExtensions
         return services.AddMassTransit(busRegConfig =>
         {
             busRegConfig.SetKebabCaseEndpointNameFormatter();
+
             busRegConfig.AddConsumer<ProductInStockEventToastNotificationHandler>();
+            busRegConfig.AddConsumer<ProductInStockEventEmailNotificationHandler>();
 
             busRegConfig.UsingRabbitMq((context, busConfig) =>
             {
@@ -33,5 +36,13 @@ public static class ServiceCollectionExtensions
                     });
             });
         });
+    }
+
+    public static IServiceCollection AddEmailService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+        services.AddTransient<EmailService>();
+
+        return services;
     }
 }
