@@ -10,4 +10,4 @@ public sealed record ProductDto(
     ProductStatus Status,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    IReadOnlyList<ProductImageDto> ProductImages);
+    IReadOnlyList<ProductImageDto> Images);

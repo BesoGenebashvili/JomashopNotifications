@@ -12,5 +12,5 @@ public sealed record ProductInStockEvent
     public required string Link { get; init; }
     public required MoneyDto Price { get; init; }
     public required DateTime CheckedAt { get; init; }
-    public IReadOnlyList<ProductImageDto> ProductImages { get; init; } = [];
+    public IReadOnlyList<ProductImageDto> Images { get; init; } = [];
 }

@@ -9,8 +9,6 @@ public class EmailService(IOptions<EmailOptions> emailOptions)
     private readonly EmailOptions _emailOptions = emailOptions.Value;
 
     public Task SendAsync(
-        string recipientMailAddress,
-        string recipientDisplayName,
         string subject,
         string body,
         bool isBodyHtml = true)
@@ -18,7 +16,7 @@ public class EmailService(IOptions<EmailOptions> emailOptions)
         var fromMailAddress = new MailAddress(_emailOptions.Sender.Email, _emailOptions.Sender.DisplayName);
         var fromCredentials = new NetworkCredential(_emailOptions.Sender.Email, _emailOptions.Sender.Password);
 
-        var toMailAddress = new MailAddress(recipientMailAddress, recipientDisplayName);
+        var toMailAddress = new MailAddress(_emailOptions.Receiver.Email, _emailOptions.Receiver.DisplayName);
 
         using var smtpClient = new SmtpClient
         {
@@ -30,7 +28,7 @@ public class EmailService(IOptions<EmailOptions> emailOptions)
             Credentials = fromCredentials
         };
 
-        using MailMessage mailMessage = new(fromMailAddress, toMailAddress)
+        using var mailMessage = new MailMessage(fromMailAddress, toMailAddress)
         {
             IsBodyHtml = isBodyHtml,
             Subject = subject,

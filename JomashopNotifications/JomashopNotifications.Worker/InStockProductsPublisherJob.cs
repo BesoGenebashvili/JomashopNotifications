@@ -64,7 +64,7 @@ public sealed class InStockProductsPublisherJob(
                 Link = p.Link,
                 Price = ip.Price,
                 CheckedAt = ip.CheckedAt,
-                ProductImages = p.ProductImages
+                Images = p.Images
             });
 
         logger.LogInformation(

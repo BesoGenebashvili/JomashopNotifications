@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Uwp.Notifications;
 using JomashopNotifications.Domain.Models;
 using JomashopNotifications.Application.InStockProduct.Contracts;
+using JomashopNotifications.EventHandler.Common;
 
 namespace JomashopNotifications.EventHandler.WindowsToastNotifications;
 
@@ -16,9 +17,7 @@ public sealed class ProductInStockEventToastNotificationHandler(
 
         logger.LogInformation("Received 'ProductInStockEvent' for product: {ProductId}, Message: {@Message}", message.ProductId, message);
 
-        var primaryImage = message.ProductImages
-                                  .FirstOrDefault(i => i.IsPrimary)?
-                                  .ImageData;
+        var primaryImage = message.GetPrimaryImage();
 
         await ShowToastNotificationAsync(
             message.ProductId,
