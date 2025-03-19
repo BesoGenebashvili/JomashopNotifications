@@ -8,10 +8,24 @@ public class EmailService(IOptions<EmailOptions> emailOptions)
 {
     private readonly EmailOptions _emailOptions = emailOptions.Value;
 
-    public Task SendAsync(
-        string subject,
-        string body,
-        bool isBodyHtml = true)
+    public async Task SendAsync(Dictionary<EmailTemplatePlaceholderKey, string> emailTemplatePlaceholders)
+    {
+        var templateFilePath = _emailOptions.Template.BodyTemplateFilePath
+                                             ?? throw new ApplicationException("Email template file path is not provided in appsettings.json");
+
+        var template = await File.ReadAllTextAsync(templateFilePath);
+
+        if (string.IsNullOrWhiteSpace(template))
+            throw new ApplicationException($"Email template file '{templateFilePath}' is empty");
+
+        var body = emailTemplatePlaceholders.Aggregate(
+                        template,
+                        (current, placeholder) => current.Replace($"{{{placeholder.Key}}}", placeholder.Value));
+
+        await SendAsync(body);
+    }
+
+    private Task SendAsync(string body)
     {
         var fromMailAddress = new MailAddress(_emailOptions.Sender.Email, _emailOptions.Sender.DisplayName);
         var fromCredentials = new NetworkCredential(_emailOptions.Sender.Email, _emailOptions.Sender.Password);
@@ -30,8 +44,8 @@ public class EmailService(IOptions<EmailOptions> emailOptions)
 
         using var mailMessage = new MailMessage(fromMailAddress, toMailAddress)
         {
-            IsBodyHtml = isBodyHtml,
-            Subject = subject,
+            IsBodyHtml = _emailOptions.Template.IsBodyHtml,
+            Subject = _emailOptions.Template.Subject,
             Body = body
         };
 

@@ -11,28 +11,11 @@ public sealed class ProductInStockEventEmailNotificationHandler(
 {
     public async Task Consume(ConsumeContext<ProductInStockEvent> context)
     {
-        var productFullName = $"{context.Message.Brand} {context.Message.Name}";
+        logger.LogInformation(
+            "Received 'ProductInStockEvent' in 'ProductInStockEventEmailNotificationHandler' for product: {ProductId}, Message: {@Message}", 
+            context.Message.ProductId, 
+            context.Message);
 
-        var subject = $"Jomashop Notification: {productFullName} is now in stock!";
-
-        var primaryImageBase64 = context.Message.GetPrimaryImageBase64() ?? await GetDefaultImageAsync();
-
-        // this should be editable.. Make something like template..
-        var body = $@"""
-                     <p><strong>Great news!</strong> The product you're interested in '{productFullName}' is now available.</p>
-                     <p><img src='data:image/jpeg;base64,{primaryImageBase64}' alt='Product Image' width='300' /></p>
-                     <p><a href='{context.Message.Link}'>🔗 View Product</a></p>
-                     """;
-
-        await emailService.SendAsync(subject, body, true);
-
-        static async Task<string> GetDefaultImageAsync() =>
-            Convert.ToBase64String(
-                await File.ReadAllBytesAsync(
-                    Path.Combine(
-                        Environment.CurrentDirectory,
-                        "Common",
-                        "Images",
-                        "default-watch.png")));
+        await emailService.SendAsync(await context.Message.FlattenAsync());
     }
 }
