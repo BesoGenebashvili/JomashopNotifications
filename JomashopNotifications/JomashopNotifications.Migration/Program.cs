@@ -35,5 +35,5 @@ static ServiceProvider CreateServiceProvider(IConfiguration configuration) =>
                    .WithGlobalConnectionString(configuration.GetConnectionString("DefaultConnection"))
                    .ScanIn(typeof(Program).Assembly).For.Migrations())
         .AddLogging(builder => builder.AddFluentMigratorConsole())
-        .AddTransient<MigrationRunner>()
+        .AddScoped<MigrationRunner>()
         .BuildServiceProvider(false);

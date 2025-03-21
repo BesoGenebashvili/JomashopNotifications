@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
                 .AddJomashopBrowserDriverService();
 
     private static IServiceCollection AddJomashopBrowserDriverService(this IServiceCollection services) =>
-        services.AddTransient<JomashopBrowserDriverService>();
+        services.AddScoped<JomashopBrowserDriverService>();
 
     public static IServiceCollection AddChromeOptions(this IServiceCollection services) =>
         services.Configure<ChromeOptions>(chromeOptions =>

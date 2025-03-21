@@ -15,12 +15,12 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("DefaultConnection")
                                     ?? throw new InvalidOperationException("Missing ConnectionStrings.DefaultConnection in appsettings.json");
 
-        services.AddSingleton<IProductsDatabase>(_ => new ProductsSqlDatabase(connectionString));
-        services.AddSingleton<IInStockProductsDatabase>(_ => new InStockProductsSqlDatabase(connectionString));
-        services.AddSingleton<IOutOfStockProductsDatabase>(_ => new OutOfStockProductsSqlDatabase(connectionString));
-        services.AddSingleton<IProductParseErrorsDatabase>(_ => new ProductParseErrorsSqlDatabase(connectionString));
-        services.AddSingleton<IApplicationErrorsDatabase>(_ => new ApplicationErrorsSqlDatabase(connectionString));
-        services.AddSingleton<IProductProfilesDatabase>(_ => new ProductProfilesSqlDatabase(connectionString));
+        services.AddScoped<IProductsDatabase>(_ => new ProductsSqlDatabase(connectionString));
+        services.AddScoped<IInStockProductsDatabase>(_ => new InStockProductsSqlDatabase(connectionString));
+        services.AddScoped<IOutOfStockProductsDatabase>(_ => new OutOfStockProductsSqlDatabase(connectionString));
+        services.AddScoped<IProductParseErrorsDatabase>(_ => new ProductParseErrorsSqlDatabase(connectionString));
+        services.AddScoped<IApplicationErrorsDatabase>(_ => new ApplicationErrorsSqlDatabase(connectionString));
+        services.AddScoped<IProductProfilesDatabase>(_ => new ProductProfilesSqlDatabase(connectionString));
 
         return services;
     }

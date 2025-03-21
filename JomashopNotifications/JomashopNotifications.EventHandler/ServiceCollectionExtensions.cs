@@ -49,6 +49,6 @@ public static class ServiceCollectionExtensions
     }
 
     private static IServiceCollection AddEmailService(this IServiceCollection services, EmailOptions emailOptions) =>
-        services.AddSingleton(_ => new EmailService(
+        services.AddScoped(_ => new EmailService(
             Options.Create(emailOptions)));
 }
