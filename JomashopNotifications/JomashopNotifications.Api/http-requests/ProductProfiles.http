@@ -1,0 +1,30 @@
+﻿@productId1 = 1
+@productId2 = 2
+GET {{HostAddress}}/{{ProductProfilesPath}}/list?productIds={{productId1}}&productIds={{productId2}}
+Accept: application/json
+
+###
+
+POST {{HostAddress}}/{{ProductProfilesPath}}/upsert
+Accept: application/json
+Content-Type: application/json
+{
+  "productId" : "1",
+  "priceThreshold": "200"
+}
+
+###
+
+@productId = 1
+PUT {{HostAddress}}/{{ProductProfilesPath}}/activate/{{productId}}
+Accept: application/json
+
+###
+
+PUT {{HostAddress}}/{{ProductProfilesPath}}/deactivate/{{productId}}
+Accept: application/json
+
+###
+
+DELETE {{HostAddress}}/{{ProductProfilesPath}}/{{productId}}
+Accept: application/json

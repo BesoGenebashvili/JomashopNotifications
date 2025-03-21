@@ -1,0 +1,8 @@
+GET {{HostAddress}}/{{InStockProductsPath}}/list
+Accept: application/json
+
+###
+
+@id = 1
+DELETE {{HostAddress}}/{{InStockProductsPath}}/{{id}}
+Accept: application/json

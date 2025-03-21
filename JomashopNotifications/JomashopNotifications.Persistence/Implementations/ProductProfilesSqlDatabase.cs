@@ -1,8 +1,10 @@
 ﻿using Dapper;
+using JomashopNotifications.Domain.Common;
 using JomashopNotifications.Persistence.Abstractions;
 using JomashopNotifications.Persistence.Common;
 using JomashopNotifications.Persistence.Entities.ProductProfile;
 using Microsoft.Data.SqlClient;
+using System.Text;
 
 namespace JomashopNotifications.Persistence.Implementations;
 
@@ -12,15 +14,18 @@ public sealed class ProductProfilesSqlDatabase(string connectionString) : IProdu
     {
         using var connection = new SqlConnection(connectionString);
 
-        var @params = new
-        {
-            productIds = productIds ?? []
-        };
+        var @params = new DynamicParameters();
 
-        var sql = $"""
-                   SELECT * FROM dbo.{DatabaseTable.ProductProfiles} WITH(NOLOCK)
-                   WHERE ProductId in @productIds
-                   """;
+        var sql = new StringBuilder(
+            $"SELECT * FROM dbo.{DatabaseTable.ProductProfiles} WITH(NOLOCK)");
+
+        if (productIds.NullIfEmpty() is { } idsValue)
+        {
+            var uniqueIds = idsValue.Distinct();
+
+            sql.Append(" WHERE ProductId in @productIds");
+            @params.Add("@productIds", uniqueIds);
+        }
 
         return await connection.QueryAsync<ProductProfileEntity>(sql.ToString(), @params);
     }

@@ -22,7 +22,7 @@ public sealed class ProductProfilesController(IMediator mediator) : ControllerBa
     public async Task<ActionResult> UpsertAsync([FromBody] UpsertProductProfileCommand command)
     {
         await mediator.Send(command);
-        return Created();
+        return Ok();
     }
 
     [HttpPut("activate/{productId:int}")]
