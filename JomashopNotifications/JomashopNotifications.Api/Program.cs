@@ -1,7 +1,5 @@
+using JomashopNotifications.Api;
 using JomashopNotifications.Api.Middleware;
-using JomashopNotifications.Application;
-using JomashopNotifications.Domain;
-using JomashopNotifications.Persistence;
 using Microsoft.AspNetCore.HttpLogging;
 using Serilog;
 using System.Text.Json.Serialization;
@@ -9,13 +7,8 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDomainServices();
-builder.Services.AddApplicationServices();
-builder.Services.AddPersistenceServices(builder.Configuration);
-
+builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Host.UseSerilog(
     (context, config) => config.ReadFrom.Configuration(context.Configuration));
@@ -43,22 +36,7 @@ builder.Services.AddControllers()
 
 var app = builder.Build();
 
-app.MapGet("/", () => Results.Redirect("/swagger"))
-   .ExcludeFromDescription()
-   .WithHttpLogging(HttpLoggingFields.None);
-
-app.MapGet("/swagger/v1/swagger.json", () => Results.Ok())
-   .ExcludeFromDescription()
-   .WithHttpLogging(HttpLoggingFields.None);
-
-app.MapGet("/swagger/index.js", () => Results.Ok())
-   .ExcludeFromDescription()
-   .WithHttpLogging(HttpLoggingFields.None);
-
-app.MapGet("/swagger/index.html", () => Results.Ok())
-   .ExcludeFromDescription()
-   .WithHttpLogging(HttpLoggingFields.None);
-
+app.MapSwaggerRoutes();
 app.UseHttpLogging();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -70,9 +48,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 try
