@@ -10,6 +10,10 @@ public static class SwaggerExtensions
             .ExcludeFromDescription()
             .WithHttpLogging(HttpLoggingFields.None);
 
+        self.MapGet("/index.html", () => Results.Redirect("/swagger"))
+            .ExcludeFromDescription()
+            .WithHttpLogging(HttpLoggingFields.None);
+
         self.MapGet("/swagger/v1/swagger.json", () => Results.Ok())
             .ExcludeFromDescription()
             .WithHttpLogging(HttpLoggingFields.None);
